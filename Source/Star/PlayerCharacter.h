@@ -15,6 +15,17 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
+	// 카메라 암
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
+	class USpringArmComponent* CameraBoom;
+
+	// 카메라
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
+	class UCameraComponent* FollowCamera;
+
+
+public:
+	float RunSpeed;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,5 +36,10 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void MoveForward(float value);
+	void MoveRight(float value);
+	void RunStart();
+	void RunStop();
 
 };
