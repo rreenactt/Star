@@ -100,16 +100,21 @@ void APlayerCharacter::MoveRight(float value)
 		const FRotator YawRot(0, Rot.Yaw, 0);
 		// 백터값으로 전환해서 저장
 		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
+
 		// 바라보는 방향으로 변수 매개변수 값만큼 이동
 		AddMovementInput(Direction, value);
 	}
 }
 void APlayerCharacter::RunStart()
 {
-	GetCharacterMovement()->MaxWalkSpeed *= RunSpeed;
+	UE_LOG(LogTemp, Warning, TEXT("Start"));
+	GetCharacterMovement()-> MaxWalkSpeed *= RunSpeed;
+
 }
 void APlayerCharacter::RunStop()
 {
-	GetCharacterMovement()->MaxWalkSpeed /= RunSpeed;
+	UE_LOG(LogTemp, Warning, TEXT("Stop"));
+
+	GetCharacterMovement()-> MaxWalkSpeed /= RunSpeed;
 
 }
