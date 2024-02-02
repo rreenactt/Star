@@ -44,7 +44,7 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	GetCharacterMovement()->MaxWalkSpeed = 600;
 }
 
 // Called every frame
@@ -83,7 +83,6 @@ void APlayerCharacter::MoveForward(float value)
 	const FRotator YawRot(0, Rot.Yaw, 0);
 	// 백터값으로 전환해서 저장
 	const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
-
 	AddMovementInput(Direction, value);
 
 }
@@ -109,6 +108,7 @@ void APlayerCharacter::RunStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Start"));
 	GetCharacterMovement()-> MaxWalkSpeed *= RunSpeed;
+	UE_LOG(LogTemp, Warning, TEXT("%d"), GetCharacterMovement()->MaxWalkSpeed);
 
 }
 void APlayerCharacter::RunStop()

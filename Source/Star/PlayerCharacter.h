@@ -39,7 +39,11 @@ public:
 
 	void MoveForward(float value);
 	void MoveRight(float value);
+
+protected:
+	UFUNCTION()
 	void RunStart();
+	UFUNCTION()
 	void RunStop();
 
 };
