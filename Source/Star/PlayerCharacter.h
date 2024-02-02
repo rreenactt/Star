@@ -25,12 +25,17 @@ public:
 
 
 public:
+
+	//UPROPERTY(Replicated, BlueprintReadOnly, Category = "Movement")
 	float RunSpeed;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	 
 public:	
+	/** 프로퍼티 리플리케이션 */
+	//void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -45,5 +50,6 @@ protected:
 	void RunStart();
 	UFUNCTION()
 	void RunStop();
-
+	UFUNCTION()
+	void OnRep_CurrentWalkSpeed();
 };

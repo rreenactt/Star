@@ -2,7 +2,9 @@
 
 
 #include "PlayerCharacter.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 // Sets default values
@@ -31,26 +33,33 @@ APlayerCharacter::APlayerCharacter()
 	// 카메라만 회전 불허
 	FollowCamera->bUsePawnControlRotation = false;
 	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;	
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
-
-
-
-	RunSpeed = 2.0;
+	//RunSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	//GetCharacterMovement()->SetIsReplicated(true);
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	GetCharacterMovement()->MaxWalkSpeed = 600;
+
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 }
+
+//void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+//{
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//
+//	//현재 체력 리플리케이트
+//	//dDOREPLIFETIME(APlayerCharacter, RunSpeed);
+//}
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 
 }
 
@@ -101,20 +110,25 @@ void APlayerCharacter::MoveRight(float value)
 		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
 
 		// 바라보는 방향으로 변수 매개변수 값만큼 이동
-		AddMovementInput(Direction, value);
+		AddMovementInput(Direction, 300);
 	}
 }
 void APlayerCharacter::RunStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Start"));
-	GetCharacterMovement()-> MaxWalkSpeed *= RunSpeed;
-	UE_LOG(LogTemp, Warning, TEXT("%d"), GetCharacterMovement()->MaxWalkSpeed);
+	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
+	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 
 }
 void APlayerCharacter::RunStop()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Stop"));
 
-	GetCharacterMovement()-> MaxWalkSpeed /= RunSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
+}
+
+void APlayerCharacter::OnRep_CurrentWalkSpeed()
+{
 
 }
