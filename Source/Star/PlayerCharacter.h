@@ -25,12 +25,17 @@ public:
 
 
 public:
+
+	UPROPERTY(ReplicatedUsing = ServerUpdateWalkSpeed)
 	float RunSpeed;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	 
 public:	
+	/** 프로퍼티 리플리케이션 */
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -39,7 +44,17 @@ public:
 
 	void MoveForward(float value);
 	void MoveRight(float value);
+
+protected:
+	UFUNCTION()
 	void RunStart();
+	UFUNCTION()
 	void RunStop();
 
+public:
+	UFUNCTION(NetMulticast, Reliable)
+	void ServerUpdateWalkSpeed(float RunSpeed);
+
+	UFUNCTION(Server, Reliable)
+	void ClientUpdateWalkSpeed(float RunSpeed);
 };
