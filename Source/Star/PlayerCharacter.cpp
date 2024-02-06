@@ -2,7 +2,9 @@
 
 
 #include "PlayerCharacter.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 // Sets default values
@@ -31,26 +33,35 @@ APlayerCharacter::APlayerCharacter()
 	// 카메라만 회전 불허
 	FollowCamera->bUsePawnControlRotation = false;
 	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;	
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+	//RunSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	//GetCharacterMovement()->SetIsReplicated(true);
+	RunSpeed = 600.0f;
 
-
-
-	RunSpeed = 2.0;
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+}
+
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//현재 체력 리플리케이트
+	DOREPLIFETIME(APlayerCharacter, RunSpeed);
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 
 }
 
@@ -83,8 +94,8 @@ void APlayerCharacter::MoveForward(float value)
 	const FRotator YawRot(0, Rot.Yaw, 0);
 	// 백터값으로 전환해서 저장
 	const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
-
-	AddMovementInput(Direction, value);
+	RunSpeed *= value;
+	AddMovementInput(Direction, RunSpeed);
 
 }
 
@@ -101,20 +112,42 @@ void APlayerCharacter::MoveRight(float value)
 		// 백터값으로 전환해서 저장
 		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
 
+		RunSpeed *= value;
 		// 바라보는 방향으로 변수 매개변수 값만큼 이동
-		AddMovementInput(Direction, value);
+		AddMovementInput(Direction, RunSpeed);
 	}
 }
 void APlayerCharacter::RunStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Start"));
-	GetCharacterMovement()-> MaxWalkSpeed *= RunSpeed;
+	//GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
+	RunSpeed = 1200.0f;
+	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 
 }
 void APlayerCharacter::RunStop()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Stop"));
+	RunSpeed = 600.0f;
 
-	GetCharacterMovement()-> MaxWalkSpeed /= RunSpeed;
+	//GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
+}
+
+// 클라이언트 이동속도 업데이트 함수
+void APlayerCharacter::ClientUpdateWalkSpeed_Implementation(float RunSpeed)
+{
+}
+void APlayerCharacter::ClientUpdateWalkSpeed_Validate(float RunSpeed)
+{
+
+}
+// 서버 이동속도 업데이트 함수 
+void APlayerCharacter::ServerUpdateWalkSpeed_Implementation(float RunSpeed)
+{
+
+}
+bool APlayerCharacter::ServerUpdateWalkSpeed_Validate()
+{
 
 }
