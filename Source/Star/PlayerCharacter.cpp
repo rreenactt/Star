@@ -35,18 +35,16 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
-	//RunSpeed = GetCharacterMovement()->MaxWalkSpeed;
-	//GetCharacterMovement()->SetIsReplicated(true);
-	RunSpeed = 600.0f;
+	
+	bReplicates = true;
 
+	isRun = false;
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -54,14 +52,14 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//현재 체력 리플리케이트
-	DOREPLIFETIME(APlayerCharacter, RunSpeed);
+	DOREPLIFETIME(APlayerCharacter, isRun);
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 
 }
 
@@ -94,8 +92,8 @@ void APlayerCharacter::MoveForward(float value)
 	const FRotator YawRot(0, Rot.Yaw, 0);
 	// 백터값으로 전환해서 저장
 	const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
-	RunSpeed *= value;
-	AddMovementInput(Direction, RunSpeed);
+	
+	AddMovementInput(Direction, value);
 
 }
 
@@ -112,42 +110,87 @@ void APlayerCharacter::MoveRight(float value)
 		// 백터값으로 전환해서 저장
 		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
 
-		RunSpeed *= value;
 		// 바라보는 방향으로 변수 매개변수 값만큼 이동
-		AddMovementInput(Direction, RunSpeed);
+		AddMovementInput(Direction, value);
 	}
 }
 void APlayerCharacter::RunStart()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start"));
-	//GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
-	RunSpeed = 1200.0f;
-	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
-
+	isRun = true;
+	ServerPlayerSpeedUpdate(isRun);
 }
 void APlayerCharacter::RunStop()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stop"));
-	RunSpeed = 600.0f;
-
-	//GetCharacterMovement()->MaxWalkSpeed = 500.0f;
-	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
+	isRun = false;
+	ServerPlayerSpeedUpdate(isRun);
 }
 
-// 클라이언트 이동속도 업데이트 함수
-void APlayerCharacter::ClientUpdateWalkSpeed_Implementation(float RunSpeed)
+void APlayerCharacter::ServerPlayerSpeedUpdate_I(bool run)
 {
-}
-void APlayerCharacter::ClientUpdateWalkSpeed_Validate(float RunSpeed)
-{
+	UE_LOG(LogTemp, Display, TEXT("im on server "));
 
+	if (HasAuthority())
+	{
+		if (run)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 1200;
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 600;
+		}
+		// 서버에서는 직접 함수를 호출
+		//MultiPlayerSpeedUpdate(run);
+	}
+	else
+	{
+		if (run)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 1200;
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 600;
+		}
+		// 클라이언트에서는 서버에게 RPC를 호출하여 값을 전달
+		UpdatePlayerSpeed(run);
+	}
 }
-// 서버 이동속도 업데이트 함수 
-void APlayerCharacter::ServerUpdateWalkSpeed_Implementation(float RunSpeed)
-{
 
-}
-bool APlayerCharacter::ServerUpdateWalkSpeed_Validate()
+bool APlayerCharacter::ServerPlayerSpeedUpdate_V(bool re)
 {
-
+	return true;
 }
+
+
+void APlayerCharacter::UpdatePlayerSpeed(bool run)
+{
+	if (isRun)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
+
+		//GetCharacterMovement()->MaxWalkSpeed = 1200;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("set speed 600"));
+
+		//GetCharacterMovement()->MaxWalkSpeed = 600;
+	}
+}
+//
+//void APlayerCharacter::MultiPlayerSpeedUpdate_I(bool run)
+//{
+//	if (run)
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
+//
+//		GetCharacterMovement()->MaxWalkSpeed = 1200;
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("set speed 600"));
+//
+//		GetCharacterMovement()->MaxWalkSpeed = 600;
+//	}
+//}
