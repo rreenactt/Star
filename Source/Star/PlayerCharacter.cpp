@@ -54,7 +54,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//현재 체력 리플리케이트
-	DOREPLIFETIME(APlayerCharacter, RunSpeed);
+	//DOREPLIFETIME(APlayerCharacter, RunSpeed);
 }
 
 // Called every frame
@@ -107,7 +107,7 @@ void APlayerCharacter::MoveRight(float value)
 	{
 		// GetConjtrolRotation을 변수에 가져옴
 		const FRotator Rot = Controller->GetControlRotation();
-		// 해당 변수에 캐릭터의 Y값을 가져옴
+		// 해당 변수에 캐릭터의 Y 값을 가져옴
 		const FRotator YawRot(0, Rot.Yaw, 0);
 		// 백터값으로 전환해서 저장
 		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
@@ -134,20 +134,20 @@ void APlayerCharacter::RunStop()
 	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 }
 
-// 클라이언트 이동속도 업데이트 함수
-void APlayerCharacter::ClientUpdateWalkSpeed_Implementation(float RunSpeed)
-{
-}
-void APlayerCharacter::ClientUpdateWalkSpeed_Validate(float RunSpeed)
-{
-
-}
-// 서버 이동속도 업데이트 함수 
-void APlayerCharacter::ServerUpdateWalkSpeed_Implementation(float RunSpeed)
-{
-
-}
-bool APlayerCharacter::ServerUpdateWalkSpeed_Validate()
-{
-
-}
+//// 클라이언트 이동속도 업데이트 함수
+//void APlayerCharacter::ClientUpdateWalkSpeed_Implementation(float RunSpeed)
+//{
+//}
+//void APlayerCharacter::ClientUpdateWalkSpeed_Validate(float RunSpeed)
+//{
+//
+//}
+//// 서버 이동속도 업데이트 함수 
+//void APlayerCharacter::ServerUpdateWalkSpeed_Implementation(float RunSpeed)
+//{
+//
+//}
+//bool APlayerCharacter::ServerUpdateWalkSpeed_Validate()
+//{
+//
+//}

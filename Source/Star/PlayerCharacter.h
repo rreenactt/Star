@@ -26,7 +26,8 @@ public:
 
 public:
 
-	UPROPERTY(ReplicatedUsing = ServerUpdateWalkSpeed)
+	//UPROPERTY(ReplicatedUsing = ServerUpdateWalkSpeed)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float RunSpeed;
 protected:
 	// Called when the game starts or when spawned
@@ -50,11 +51,11 @@ protected:
 	void RunStart();
 	UFUNCTION()
 	void RunStop();
-
-public:
-	UFUNCTION(NetMulticast, Reliable)
-	void ServerUpdateWalkSpeed(float RunSpeed);
-
-	UFUNCTION(Server, Reliable)
-	void ClientUpdateWalkSpeed(float RunSpeed);
+//
+//public:
+//	UFUNCTION(NetMulticast, Reliable)
+//	void ServerUpdateWalkSpeed(float RunSpeed);
+//
+//	UFUNCTION(Server, Reliable)
+//	void ClientUpdateWalkSpeed(float RunSpeed);
 };
