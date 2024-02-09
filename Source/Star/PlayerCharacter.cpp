@@ -114,83 +114,87 @@ void APlayerCharacter::MoveRight(float value)
 		AddMovementInput(Direction, value);
 	}
 }
+// runStart 입력 받는 함수
 void APlayerCharacter::RunStart()
 {
 	isRun = true;
-	ServerPlayerSpeedUpdate(isRun);
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerPlayerRunStart(isRun);
+	}
+	PlayerSpeedUpdate();
 }
+
+// runStop 입력 받는 함수
 void APlayerCharacter::RunStop()
 {
 	isRun = false;
-	ServerPlayerSpeedUpdate(isRun);
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerPlayerRunStop(isRun);
+	}
+	PlayerSpeedUpdate();
 }
 
-void APlayerCharacter::ServerPlayerSpeedUpdate_I(bool run)
+// Server Run Start
+void APlayerCharacter::ServerPlayerRunStart_I(bool run)
 {
-	UE_LOG(LogTemp, Display, TEXT("im on server "));
-
+	// 관한있는지 확인
 	if (HasAuthority())
 	{
-		if (run)
-		{
-			GetCharacterMovement()->MaxWalkSpeed = 1200;
-		}
-		else
-		{
-			GetCharacterMovement()->MaxWalkSpeed = 600;
-		}
-		// 서버에서는 직접 함수를 호출
-		//MultiPlayerSpeedUpdate(run);
-	}
-	else
-	{
-		if (run)
-		{
-			GetCharacterMovement()->MaxWalkSpeed = 1200;
-		}
-		else
-		{
-			GetCharacterMovement()->MaxWalkSpeed = 600;
-		}
-		// 클라이언트에서는 서버에게 RPC를 호출하여 값을 전달
-		UpdatePlayerSpeed(run);
+		GetCharacterMovement()->MaxWalkSpeed = 750;
+		isRun = true;
 	}
 }
-
-bool APlayerCharacter::ServerPlayerSpeedUpdate_V(bool re)
+bool APlayerCharacter::ServerPlayerRunStart_V(bool re)
 {
 	return true;
 }
 
 
-void APlayerCharacter::UpdatePlayerSpeed(bool run)
+// Server Run Stop
+void APlayerCharacter::ServerPlayerRunStop_I(bool run)
 {
+	// 관한있는지 확인
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 330;
+		isRun = false;
+	}
+}
+bool APlayerCharacter::ServerPlayerRunStop_V(bool re)
+{
+	return true;
+}
+
+// Multicast
+void APlayerCharacter::MultiPlayerSpeedUpdate_Implementation(bool run)
+{
+	// 각 클라이언트가 가지고 있는 PlayerSpeedUpdate() 호출
+	PlayerSpeedUpdate();
+}
+
+// 서버에서 각 클라이언트들한테 속도 업데이트하라고 부르는 함수
+void APlayerCharacter::PlayerSpeedUpdateCall()
+{
+	// 멀티케스트 호출
+	MultiPlayerSpeedUpdate(isRun);
+}
+
+// 클라이언트들의 실질적 속도 변환 함수
+void APlayerCharacter::PlayerSpeedUpdate()
+{
+	//여기서 현재 작동하는 달리기 값 변환중 
 	if (isRun)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
 
-		//GetCharacterMovement()->MaxWalkSpeed = 1200;
+		GetCharacterMovement()->MaxWalkSpeed = 750;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("set speed 600"));
+		UE_LOG(LogTemp, Warning, TEXT("set speed 500"));
 
-		//GetCharacterMovement()->MaxWalkSpeed = 600;
+		GetCharacterMovement()->MaxWalkSpeed = 330;
 	}
 }
-//
-//void APlayerCharacter::MultiPlayerSpeedUpdate_I(bool run)
-//{
-//	if (run)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
-//
-//		GetCharacterMovement()->MaxWalkSpeed = 1200;
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("set speed 600"));
-//
-//		GetCharacterMovement()->MaxWalkSpeed = 600;
-//	}
-//}
