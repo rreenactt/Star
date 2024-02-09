@@ -114,81 +114,87 @@ void APlayerCharacter::MoveRight(float value)
 		AddMovementInput(Direction, value);
 	}
 }
-void APlayerCharacter::oo()
-{
-	// isRun 값이 변해서 호출됨 
-	// 멀티케스트 호출
-	MultiPlayerSpeedUpdate(isRun);
-	
-}
+// runStart 입력 받는 함수
 void APlayerCharacter::RunStart()
 {
+	isRun = true;
 	if (GetLocalRole() < ROLE_Authority)
 	{
-		isRun = true;
-		// isRun 값 서버로 이동
-		ServerPlayerSpeedUpdate(isRun);
+		ServerPlayerRunStart(isRun);
 	}
-	
-}
-void APlayerCharacter::RunStop()
-{
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		isRun = false;
-		// isRun 값 서버로 이동
-		ServerPlayerSpeedUpdate(isRun);
-	}
+	PlayerSpeedUpdate();
 }
 
-void APlayerCharacter::ServerPlayerSpeedUpdate_I(bool run)
+// runStop 입력 받는 함수
+void APlayerCharacter::RunStop()
+{
+	isRun = false;
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerPlayerRunStop(isRun);
+	}
+	PlayerSpeedUpdate();
+}
+
+// Server Run Start
+void APlayerCharacter::ServerPlayerRunStart_I(bool run)
 {
 	// 관한있는지 확인
 	if (HasAuthority())
 	{
-		// 일 못하고 있는 코드 (안고쳐도 작동하지만 고치는게 좋을듯 run 매개변수가 NUll값 반환함.
-		if (run)
-		{
-			GetCharacterMovement()->MaxWalkSpeed = 1000;
-		}
-		else
-		{
-			GetCharacterMovement()->MaxWalkSpeed = 500;
-		}
-		// 서버에서는 직접 함수를 호출
+		GetCharacterMovement()->MaxWalkSpeed = 750;
+		isRun = true;
 	}
-	else
-	{
-		if (run)
-		{
-			//GetCharacterMovement()->MaxWalkSpeed = 1000;
-		}
-		else
-		{
-			//GetCharacterMovement()->MaxWalkSpeed = 200;
-		}
-	}
-	
 }
-
-bool APlayerCharacter::ServerPlayerSpeedUpdate_V(bool re)
+bool APlayerCharacter::ServerPlayerRunStart_V(bool re)
 {
 	return true;
 }
 
+
+// Server Run Stop
+void APlayerCharacter::ServerPlayerRunStop_I(bool run)
+{
+	// 관한있는지 확인
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 330;
+		isRun = false;
+	}
+}
+bool APlayerCharacter::ServerPlayerRunStop_V(bool re)
+{
+	return true;
+}
+
+// Multicast
 void APlayerCharacter::MultiPlayerSpeedUpdate_Implementation(bool run)
-{// 모든 클라이언트에게 적용
+{
+	// 각 클라이언트가 가지고 있는 PlayerSpeedUpdate() 호출
+	PlayerSpeedUpdate();
+}
+
+// 서버에서 각 클라이언트들한테 속도 업데이트하라고 부르는 함수
+void APlayerCharacter::PlayerSpeedUpdateCall()
+{
+	// 멀티케스트 호출
+	MultiPlayerSpeedUpdate(isRun);
+}
+
+// 클라이언트들의 실질적 속도 변환 함수
+void APlayerCharacter::PlayerSpeedUpdate()
+{
 	//여기서 현재 작동하는 달리기 값 변환중 
-	if (run)
+	if (isRun)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
 
-		GetCharacterMovement()->MaxWalkSpeed = 1000;
+		GetCharacterMovement()->MaxWalkSpeed = 750;
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("set speed 500"));
 
-		GetCharacterMovement()->MaxWalkSpeed = 500;
+		GetCharacterMovement()->MaxWalkSpeed = 330;
 	}
 }
