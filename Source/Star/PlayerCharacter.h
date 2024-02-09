@@ -29,7 +29,7 @@ public:
 	/*UPROPERTY(Replicated)
 	float RunSpeed;*/
 
-	UPROPERTY(ReplicatedUsing = oo)
+	UPROPERTY(ReplicatedUsing = UpdatePlayerSpeed)
 	bool isRun;
 
 protected:
@@ -49,8 +49,6 @@ public:
 	void MoveForward(float value);
 	void MoveRight(float value);
 
-	UFUNCTION()
-	void oo();
 protected:
 	UFUNCTION()
 	void RunStart();
@@ -64,8 +62,10 @@ protected:
 	void ServerPlayerSpeedUpdate_I(bool run);
 	bool ServerPlayerSpeedUpdate_V(bool re);
 
-	UFUNCTION(Reliable, NetMulticast)
-	void MultiPlayerSpeedUpdate(bool run);
-	void MultiPlayerSpeedUpdate_Implementation(bool run);
+	//UFUNCTION(Reliable, NetMulticast = "MultiPlayerSpeedUpdate_I")
+	//void MultiPlayerSpeedUpdate(bool run);
+	//void MultiPlayerSpeedUpdate_I(bool run);
 
+	UFUNCTION()
+	void UpdatePlayerSpeed(bool run);
 };

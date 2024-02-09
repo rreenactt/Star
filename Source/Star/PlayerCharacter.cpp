@@ -114,61 +114,47 @@ void APlayerCharacter::MoveRight(float value)
 		AddMovementInput(Direction, value);
 	}
 }
-void APlayerCharacter::oo()
-{
-	// isRun 값이 변해서 호출됨 
-	// 멀티케스트 호출
-	MultiPlayerSpeedUpdate(isRun);
-	
-}
 void APlayerCharacter::RunStart()
 {
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		isRun = true;
-		// isRun 값 서버로 이동
-		ServerPlayerSpeedUpdate(isRun);
-	}
-	
+	isRun = true;
+	ServerPlayerSpeedUpdate(isRun);
 }
 void APlayerCharacter::RunStop()
 {
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		isRun = false;
-		// isRun 값 서버로 이동
-		ServerPlayerSpeedUpdate(isRun);
-	}
+	isRun = false;
+	ServerPlayerSpeedUpdate(isRun);
 }
 
 void APlayerCharacter::ServerPlayerSpeedUpdate_I(bool run)
 {
-	// 관한있는지 확인
+	UE_LOG(LogTemp, Display, TEXT("im on server "));
+
 	if (HasAuthority())
 	{
-		// 일 못하고 있는 코드 (안고쳐도 작동하지만 고치는게 좋을듯 run 매개변수가 NUll값 반환함.
 		if (run)
 		{
-			GetCharacterMovement()->MaxWalkSpeed = 1000;
+			GetCharacterMovement()->MaxWalkSpeed = 1200;
 		}
 		else
 		{
-			GetCharacterMovement()->MaxWalkSpeed = 500;
+			GetCharacterMovement()->MaxWalkSpeed = 600;
 		}
 		// 서버에서는 직접 함수를 호출
+		//MultiPlayerSpeedUpdate(run);
 	}
 	else
 	{
 		if (run)
 		{
-			//GetCharacterMovement()->MaxWalkSpeed = 1000;
+			GetCharacterMovement()->MaxWalkSpeed = 1200;
 		}
 		else
 		{
-			//GetCharacterMovement()->MaxWalkSpeed = 200;
+			GetCharacterMovement()->MaxWalkSpeed = 600;
 		}
+		// 클라이언트에서는 서버에게 RPC를 호출하여 값을 전달
+		UpdatePlayerSpeed(run);
 	}
-	
 }
 
 bool APlayerCharacter::ServerPlayerSpeedUpdate_V(bool re)
@@ -176,19 +162,35 @@ bool APlayerCharacter::ServerPlayerSpeedUpdate_V(bool re)
 	return true;
 }
 
-void APlayerCharacter::MultiPlayerSpeedUpdate_Implementation(bool run)
-{// 모든 클라이언트에게 적용
-	//여기서 현재 작동하는 달리기 값 변환중 
-	if (run)
+
+void APlayerCharacter::UpdatePlayerSpeed(bool run)
+{
+	if (isRun)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
 
-		GetCharacterMovement()->MaxWalkSpeed = 1000;
+		//GetCharacterMovement()->MaxWalkSpeed = 1200;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("set speed 500"));
+		UE_LOG(LogTemp, Warning, TEXT("set speed 600"));
 
-		GetCharacterMovement()->MaxWalkSpeed = 500;
+		//GetCharacterMovement()->MaxWalkSpeed = 600;
 	}
 }
+//
+//void APlayerCharacter::MultiPlayerSpeedUpdate_I(bool run)
+//{
+//	if (run)
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
+//
+//		GetCharacterMovement()->MaxWalkSpeed = 1200;
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("set speed 600"));
+//
+//		GetCharacterMovement()->MaxWalkSpeed = 600;
+//	}
+//}
