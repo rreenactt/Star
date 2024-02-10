@@ -26,8 +26,12 @@ public:
 
 public:
 
-	UPROPERTY(ReplicatedUsing = ServerUpdateWalkSpeed)
-	float RunSpeed;
+	/*UPROPERTY(Replicated)
+	float RunSpeed;*/
+
+	UPROPERTY(ReplicatedUsing = PlayerSpeedUpdateCall)
+	bool isRun;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,16 +49,31 @@ public:
 	void MoveForward(float value);
 	void MoveRight(float value);
 
+	UFUNCTION()
+	void PlayerSpeedUpdateCall();
+
+	UFUNCTION()
+	void PlayerSpeedUpdate();
 protected:
 	UFUNCTION()
 	void RunStart();
 	UFUNCTION()
 	void RunStop();
 
-public:
-	UFUNCTION(NetMulticast, Reliable)
-	void ServerUpdateWalkSpeed(float RunSpeed);
+protected:
 
-	UFUNCTION(Server, Reliable)
-	void ClientUpdateWalkSpeed(float RunSpeed);
+	UFUNCTION(Reliable, Server = "ServerPlayerRunStart_I", WithValidation = "ServerPlayerRunStart_V")
+	virtual void ServerPlayerRunStart(bool run);
+	void ServerPlayerRunStart_I(bool run);
+	bool ServerPlayerRunStart_V(bool re);
+	UFUNCTION(Reliable, Server = "ServerPlayerRunStop_I", WithValidation = "ServerPlayerRunStop_V")
+	virtual void ServerPlayerRunStop(bool run);
+	void ServerPlayerRunStop_I(bool run);
+	bool ServerPlayerRunStop_V(bool re);
+
+
+	UFUNCTION(Reliable, NetMulticast)
+	void MultiPlayerSpeedUpdate(bool run);
+	void MultiPlayerSpeedUpdate_Implementation(bool run);
+
 };
