@@ -31,7 +31,6 @@ public:
 
 	UPROPERTY(ReplicatedUsing = PlayerSpeedUpdateCall)
 	bool isRun;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -75,5 +74,4 @@ protected:
 	UFUNCTION(Reliable, NetMulticast)
 	void MultiPlayerSpeedUpdate(bool run);
 	void MultiPlayerSpeedUpdate_Implementation(bool run);
-
 };
