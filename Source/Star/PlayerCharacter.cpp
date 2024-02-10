@@ -35,18 +35,16 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
-	//RunSpeed = GetCharacterMovement()->MaxWalkSpeed;
-	//GetCharacterMovement()->SetIsReplicated(true);
-	RunSpeed = 600.0f;
+	
+	bReplicates = true;
 
+	isRun = false;
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -54,14 +52,14 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//현재 체력 리플리케이트
-	//DOREPLIFETIME(APlayerCharacter, RunSpeed);
+	DOREPLIFETIME(APlayerCharacter, isRun);
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 
 }
 
@@ -94,8 +92,8 @@ void APlayerCharacter::MoveForward(float value)
 	const FRotator YawRot(0, Rot.Yaw, 0);
 	// 백터값으로 전환해서 저장
 	const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
-	RunSpeed *= value;
-	AddMovementInput(Direction, RunSpeed);
+	
+	AddMovementInput(Direction, value);
 
 }
 
@@ -112,42 +110,91 @@ void APlayerCharacter::MoveRight(float value)
 		// 백터값으로 전환해서 저장
 		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
 
-		RunSpeed *= value;
 		// 바라보는 방향으로 변수 매개변수 값만큼 이동
-		AddMovementInput(Direction, RunSpeed);
+		AddMovementInput(Direction, value);
 	}
 }
+// runStart 입력 받는 함수
 void APlayerCharacter::RunStart()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start"));
-	//GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
-	RunSpeed = 1200.0f;
-	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
-
+	isRun = true;
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerPlayerRunStart(isRun);
+	}
+	PlayerSpeedUpdate();
 }
+
+// runStop 입력 받는 함수
 void APlayerCharacter::RunStop()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stop"));
-	RunSpeed = 600.0f;
-
-	//GetCharacterMovement()->MaxWalkSpeed = 500.0f;
-	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
+	isRun = false;
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerPlayerRunStop(isRun);
+	}
+	PlayerSpeedUpdate();
 }
 
-//// 클라이언트 이동속도 업데이트 함수
-//void APlayerCharacter::ClientUpdateWalkSpeed_Implementation(float RunSpeed)
-//{
-//}
-//void APlayerCharacter::ClientUpdateWalkSpeed_Validate(float RunSpeed)
-//{
-//
-//}
-//// 서버 이동속도 업데이트 함수 
-//void APlayerCharacter::ServerUpdateWalkSpeed_Implementation(float RunSpeed)
-//{
-//
-//}
-//bool APlayerCharacter::ServerUpdateWalkSpeed_Validate()
-//{
-//
-//}
+// Server Run Start
+void APlayerCharacter::ServerPlayerRunStart_I(bool run)
+{
+	// 관한있는지 확인
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 750;
+		isRun = true;
+	}
+}
+bool APlayerCharacter::ServerPlayerRunStart_V(bool re)
+{
+	return true;
+}
+
+
+// Server Run Stop
+void APlayerCharacter::ServerPlayerRunStop_I(bool run)
+{
+	// 관한있는지 확인
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 330;
+		isRun = false;
+	}
+}
+bool APlayerCharacter::ServerPlayerRunStop_V(bool re)
+{
+	return true;
+}
+
+// Multicast
+void APlayerCharacter::MultiPlayerSpeedUpdate_Implementation(bool run)
+{
+	// 각 클라이언트가 가지고 있는 PlayerSpeedUpdate() 호출
+	PlayerSpeedUpdate();
+}
+
+// 서버에서 각 클라이언트들한테 속도 업데이트하라고 부르는 함수
+void APlayerCharacter::PlayerSpeedUpdateCall()
+{
+	// 멀티케스트 호출
+	MultiPlayerSpeedUpdate(isRun);
+}
+
+// 클라이언트들의 실질적 속도 변환 함수
+void APlayerCharacter::PlayerSpeedUpdate()
+{
+	//여기서 현재 작동하는 달리기 값 변환중 
+	if (isRun)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
+
+		GetCharacterMovement()->MaxWalkSpeed = 750;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("set speed 500"));
+
+		GetCharacterMovement()->MaxWalkSpeed = 330;
+	}
+}

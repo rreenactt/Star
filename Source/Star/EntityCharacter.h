@@ -3,29 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EntityCharacter.h"
-#include "AICharacter.generated.h"
+#include "GameFramework/Character.h"
+#include "EntityCharacter.generated.h"
 
-/**
- * 
- */
-UCLASS()
-class STAR_API AAICharacter : public AEntityCharacter
+UCLASS(Abstract)
+class STAR_API AEntityCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	AAICharacter();
+	// Sets default values for this character's properties
+	AEntityCharacter();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:
+public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-public:
-	virtual void Die() override;
+
+	virtual void Die() PURE_VIRTUAL(AEntityCharacter::Die, );
 };
