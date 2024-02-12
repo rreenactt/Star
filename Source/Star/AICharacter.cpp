@@ -12,11 +12,11 @@ void AAICharacter::BeginPlay()
 	Super::BeginPlay();
 	FTimerHandle myTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			Die();
+	{
+		Die();
 
-			GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-		}), 5.0f, false);
+		GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+	}), 15.0f, false);
 }
 
 void AAICharacter::Tick(float DeltaTime)
@@ -33,4 +33,7 @@ void AAICharacter::Die()
 {
 	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
 	GetMesh()->SetSimulatePhysics(true);
+
+	// 김재현 넣음
+	Destroy();
 }
