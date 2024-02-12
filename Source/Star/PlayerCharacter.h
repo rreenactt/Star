@@ -35,6 +35,12 @@ public:
 
 	UPROPERTY(ReplicatedUsing = PlayerJumpUpdateCall)
 	bool isJump;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isFalling;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isPlayerJump;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

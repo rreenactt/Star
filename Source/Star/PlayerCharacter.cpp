@@ -39,6 +39,11 @@ APlayerCharacter::APlayerCharacter()
 	bReplicates = true;
 
 	isRun = false;
+
+	isFalling = false;
+
+	isPlayerJump = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -60,7 +65,8 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
+
+	isFalling = GetCharacterMovement()->IsFalling();
 
 }
 
@@ -147,6 +153,8 @@ void APlayerCharacter::RunStop()
 
 void APlayerCharacter::JumpStart()
 {
+	isPlayerJump = true;
+
 	isJump = true;
 	if (GetLocalRole() < ROLE_Authority)
 	{
@@ -157,6 +165,8 @@ void APlayerCharacter::JumpStart()
 
 void APlayerCharacter::JumpEnd()
 {
+	isPlayerJump = false;
+
 	isJump = false;
 	if (GetLocalRole() < ROLE_Authority)
 	{
