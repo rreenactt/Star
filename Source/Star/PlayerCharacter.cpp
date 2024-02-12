@@ -53,7 +53,6 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	//현재 체력 리플리케이트
 	DOREPLIFETIME(APlayerCharacter, isRun);
-	DOREPLIFETIME(APlayerCharacter, isJump);
 }
 
 // Called every frame
@@ -80,9 +79,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// 캐릭터 달리기 시작과 끝
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &APlayerCharacter::RunStart);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &APlayerCharacter::RunStop);
-
-	// 캐릭터 점프 시작과 끝
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerCharacter::JumpStart);
 
 }
 
@@ -118,11 +114,6 @@ void APlayerCharacter::MoveRight(float value)
 		AddMovementInput(Direction, value);
 	}
 }
-
-void APlayerCharacter::Landed(const FHitResult& Hit)
-{
-	JumpEnd();
-}
 // runStart 입력 받는 함수
 void APlayerCharacter::RunStart()
 {
@@ -145,41 +136,6 @@ void APlayerCharacter::RunStop()
 	PlayerSpeedUpdate();
 }
 
-void APlayerCharacter::JumpStart()
-{
-	isJump = true;
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		ServerPlayerJumpStart(isJump);
-	}
-	PalyerJumpUpdate();
-}
-
-void APlayerCharacter::JumpEnd()
-{
-	isJump = false;
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		ServerPlayerJumpEnd(isJump);
-	}
-	PalyerJumpUpdate();
-}
-
-/////////////////////////////////////////////////////////////// 기능 구현 부분
-
-// speed update call 
-void APlayerCharacter::PlayerSpeedUpdateCall() 
-{
-	MultiPlayerSpeedUpdate(isRun); // 멀티케스트 호출	
-} 
-//Jump Update call
-void APlayerCharacter::PlayerJumpUpdateCall()
-{
-	MultiPlayerJumpUpdate(isJump); // 멀티케스트 호출
-}
-
-
-// Run server 동기화
 // Server Run Start
 void APlayerCharacter::ServerPlayerRunStart_I(bool run)
 {
@@ -194,6 +150,8 @@ bool APlayerCharacter::ServerPlayerRunStart_V(bool re)
 {
 	return true;
 }
+
+
 // Server Run Stop
 void APlayerCharacter::ServerPlayerRunStop_I(bool run)
 {
@@ -208,69 +166,35 @@ bool APlayerCharacter::ServerPlayerRunStop_V(bool re)
 {
 	return true;
 }
+
 // Multicast
 void APlayerCharacter::MultiPlayerSpeedUpdate_Implementation(bool run)
 {
 	// 각 클라이언트가 가지고 있는 PlayerSpeedUpdate() 호출
 	PlayerSpeedUpdate();
 }
+
 // 서버에서 각 클라이언트들한테 속도 업데이트하라고 부르는 함수
+void APlayerCharacter::PlayerSpeedUpdateCall()
+{
+	// 멀티케스트 호출
+	MultiPlayerSpeedUpdate(isRun);
+}
+
 // 클라이언트들의 실질적 속도 변환 함수
 void APlayerCharacter::PlayerSpeedUpdate()
 {
 	//여기서 현재 작동하는 달리기 값 변환중 
 	if (isRun)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("set speed 1200"));
+
 		GetCharacterMovement()->MaxWalkSpeed = 750;
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("set speed 500"));
+
 		GetCharacterMovement()->MaxWalkSpeed = 330;
 	}
-} 
-
-// Jump server 동기화
-// Jump Start
-void APlayerCharacter::ServerPlayerJumpStart_I(bool jump)
-{
-	if (HasAuthority())
-	{
-		Super::Jump();
-		isJump = true;
-	}
 }
-bool APlayerCharacter::ServerPlayerJumpStart_V(bool jum)
-{
-	return true;
-}
-// 착지
-void APlayerCharacter::ServerPlayerJumpEnd_I(bool jump)
-{
-	if (HasAuthority())
-	{
-		Super::StopJumping();
-		isJump = false;
-	}
-}
-bool APlayerCharacter::ServerPlayerJumpEnd_V(bool jum)
-{
-	return true;
-}
-
-void APlayerCharacter::MultiPlayerJumpUpdate_Implementation(bool jump)
-{
-	// 각클라이언트들 JumpUpdate 함수 호출
-	PalyerJumpUpdate();
-}
-void APlayerCharacter::PalyerJumpUpdate()
-{
-	if (isJump)
-	{
-		Super::Jump();
-	}
-	else
-	{
-		Super::StopJumping();
-	}
-}
-
