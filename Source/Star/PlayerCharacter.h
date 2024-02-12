@@ -29,12 +29,15 @@ public:
 	/*UPROPERTY(Replicated)
 	float RunSpeed;*/
 
-	// 서버에서 달리면 PlayerSpeedUpdateCall 함수가 호출하는 변수
+	// 서버에서 변수의 값이 변하면 함수가 호출하는 변수들
 	UPROPERTY(ReplicatedUsing = PlayerSpeedUpdateCall)
 	bool isRun;
 
 	UPROPERTY(ReplicatedUsing = PlayerJumpUpdateCall)
 	bool isJump;
+
+	UPROPERTY(ReplicatedUsing = PlayerAttackUpdateCall)
+	bool isAttack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isFalling;
@@ -62,10 +65,13 @@ public:
 	void PlayerSpeedUpdateCall();
 	UFUNCTION()
 	void PlayerJumpUpdateCall();
+	UFUNCTION()
+	void PlayerAttackUpdateCall();
 
 	UFUNCTION()
 	void PlayerSpeedUpdate();
 	void PalyerJumpUpdate();
+	void PalyerAttackUpdate();
 
 	UFUNCTION()
 	virtual void Landed(const FHitResult& Hit);
@@ -78,6 +84,10 @@ protected:
 	UFUNCTION()
 	void JumpStart();
 	void JumpEnd();
+
+	UFUNCTION()
+	void AttackStart();
+	void AttackEnd();
 
 // 달리기 Server, multi
 protected:
@@ -110,4 +120,20 @@ protected:
 	UFUNCTION(Reliable, NetMulticast)
 	virtual void MultiPlayerJumpUpdate(bool jump);
 	void MultiPlayerJumpUpdate_Implementation(bool jump);
+
+protected:
+	UFUNCTION(Reliable, Server = "ServerPlayerAttackStart_I", WithValidation = "ServerPlayerAttackStart_V")
+	virtual void ServerPlayerAttackStart(bool att);
+	void ServerPlayerAttackStart_I(bool att);
+	bool ServerPlayerAttackStart_V(bool att);
+
+	UFUNCTION(Reliable, Server = "ServerPlayerAttackEnd_I", WithValidation = "ServerPlayerAttackEnd_V")
+	virtual void ServerPlayerAttackEnd(bool att);
+	void ServerPlayerAttackEnd_I(bool att);
+	bool ServerPlayerAttackEnd_V(bool att);
+
+	UFUNCTION(Reliable, NetMulticast)
+	virtual void MultiPlayerAttackUpdate(bool att);
+	void MultiPlayerAttackUpdate_Implementation(bool att);
+
 };

@@ -36,14 +36,16 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	
+	// 리플리케이션 허용
 	bReplicates = true;
-
+	// 달리고 있는가
 	isRun = false;
-
+	// 공중에 있는가
 	isFalling = false;
-
+	// 점프를 했는가
 	isPlayerJump = false;
-
+	// 공격을 했는가
+	isAttack = false;
 }
 
 // Called when the game starts or when spawned
@@ -59,6 +61,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	//현재 체력 리플리케이트
 	DOREPLIFETIME(APlayerCharacter, isRun);
 	DOREPLIFETIME(APlayerCharacter, isJump);
+	DOREPLIFETIME(APlayerCharacter, isAttack);
 }
 
 // Called every frame
@@ -89,6 +92,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// 캐릭터 점프 시작과 끝
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerCharacter::JumpStart);
+
+	// 공격
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::AttackStart);
 
 }
 
@@ -124,12 +130,12 @@ void APlayerCharacter::MoveRight(float value)
 		AddMovementInput(Direction, value);
 	}
 }
-
+// 착지, 지면에 닿으면 호출되는 함수
 void APlayerCharacter::Landed(const FHitResult& Hit)
 {
 	JumpEnd();
 }
-// runStart 입력 받는 함수
+
 void APlayerCharacter::RunStart()
 {
 	isRun = true;
@@ -139,8 +145,6 @@ void APlayerCharacter::RunStart()
 	}
 	PlayerSpeedUpdate();
 }
-
-// runStop 입력 받는 함수
 void APlayerCharacter::RunStop()
 {
 	isRun = false;
@@ -162,7 +166,6 @@ void APlayerCharacter::JumpStart()
 	}
 	PalyerJumpUpdate();
 }
-
 void APlayerCharacter::JumpEnd()
 {
 	isPlayerJump = false;
@@ -175,8 +178,27 @@ void APlayerCharacter::JumpEnd()
 	PalyerJumpUpdate();
 }
 
+void APlayerCharacter::AttackStart()
+{
+	isAttack = true;
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerPlayerAttackStart(isAttack);
+	}
+}
+
+void APlayerCharacter::AttackEnd()
+{
+	isAttack = false;
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerPlayerAttackEnd(isAttack);
+	}
+}
+
 /////////////////////////////////////////////////////////////// 기능 구현 부분
 
+// 변수가 변했을때 호출하는 함수 부분
 // speed update call 
 void APlayerCharacter::PlayerSpeedUpdateCall() 
 {
@@ -187,7 +209,13 @@ void APlayerCharacter::PlayerJumpUpdateCall()
 {
 	MultiPlayerJumpUpdate(isJump); // 멀티케스트 호출
 }
+//Attack Update call
+void APlayerCharacter::PlayerAttackUpdateCall()
+{
+	MultiPlayerAttackUpdate(isAttack);
+}
 
+/////////////////////////////////////////////////////////////// RUN
 
 // Run server 동기화
 // Server Run Start
@@ -239,6 +267,8 @@ void APlayerCharacter::PlayerSpeedUpdate()
 	}
 } 
 
+/////////////////////////////////////////////////////////////// JUMP
+
 // Jump server 동기화
 // Jump Start
 void APlayerCharacter::ServerPlayerJumpStart_I(bool jump)
@@ -266,7 +296,6 @@ bool APlayerCharacter::ServerPlayerJumpEnd_V(bool jum)
 {
 	return true;
 }
-
 void APlayerCharacter::MultiPlayerJumpUpdate_Implementation(bool jump)
 {
 	// 각클라이언트들 JumpUpdate 함수 호출
@@ -284,3 +313,26 @@ void APlayerCharacter::PalyerJumpUpdate()
 	}
 }
 
+
+/////////////////////////////////////////////////////////////// ATTACK
+
+void APlayerCharacter::ServerPlayerAttackStart_I(bool att)
+{
+}
+bool APlayerCharacter::ServerPlayerAttackStart_V(bool att)
+{
+	return false;
+}
+void APlayerCharacter::ServerPlayerAttackEnd_I(bool att)
+{
+}
+bool APlayerCharacter::ServerPlayerAttackEnd_V(bool att)
+{
+	return false;
+}
+void APlayerCharacter::MultiPlayerAttackUpdate_Implementation(bool att)
+{
+}
+void APlayerCharacter::PalyerAttackUpdate()
+{
+}
