@@ -14,4 +14,10 @@ class STAR_API UMultyPlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 	
+	UMultyPlayerAnimInstance();
+public:
+	void PlayAttackMontage();//몽타주 실행
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* AttackMontage;
 };

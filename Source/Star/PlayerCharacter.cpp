@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Character.h"
+#include "MultyPlayerAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 // Sets default values
@@ -42,16 +43,29 @@ APlayerCharacter::APlayerCharacter()
 	isRun = false;
 	// 공중에 있는가
 	isFalling = false;
-	// 점프를 했는가
+	// 점프를 했는가(서버)
+	isJump = false;
+	// 점프를 했는가(플레이어)
 	isPlayerJump = false;
 	// 공격을 했는가
 	isAttack = false;
+	// 공격 중인가
+	isAttacking = false;
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void APlayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+
+	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
+	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -130,6 +144,10 @@ void APlayerCharacter::MoveRight(float value)
 		AddMovementInput(Direction, value);
 	}
 }
+void APlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	AttackEnd();
+}
 // 착지, 지면에 닿으면 호출되는 함수
 void APlayerCharacter::Landed(const FHitResult& Hit)
 {
@@ -180,20 +198,21 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
-	isAttack = true;
-	if (GetLocalRole() < ROLE_Authority)
+	if (GetLocalRole() < ROLE_Authority && !isAttack)
 	{
 		ServerPlayerAttackStart(isAttack);
 	}
+	isAttack = true;
+	PalyerAttackUpdate();
 }
 
 void APlayerCharacter::AttackEnd()
 {
-	isAttack = false;
-	if (GetLocalRole() < ROLE_Authority)
+	if (GetLocalRole() < ROLE_Authority && isAttack)
 	{
 		ServerPlayerAttackEnd(isAttack);
 	}
+	isAttack = false;
 }
 
 /////////////////////////////////////////////////////////////// 기능 구현 부분
@@ -212,7 +231,7 @@ void APlayerCharacter::PlayerJumpUpdateCall()
 //Attack Update call
 void APlayerCharacter::PlayerAttackUpdateCall()
 {
-	MultiPlayerAttackUpdate(isAttack);
+	MultiPlayerAttackUpdate();
 }
 
 /////////////////////////////////////////////////////////////// RUN
@@ -318,21 +337,38 @@ void APlayerCharacter::PalyerJumpUpdate()
 
 void APlayerCharacter::ServerPlayerAttackStart_I(bool att)
 {
+	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	// 실패시 리턴
+	if (nullptr == AnimInstance)
+		return;
+
+	AnimInstance->PlayAttackMontage();
+	isAttack = true;
+	PlayerAttackUpdateCall();
 }
 bool APlayerCharacter::ServerPlayerAttackStart_V(bool att)
 {
-	return false;
+	return true;
 }
 void APlayerCharacter::ServerPlayerAttackEnd_I(bool att)
 {
+	isAttack = false;
+
 }
 bool APlayerCharacter::ServerPlayerAttackEnd_V(bool att)
 {
-	return false;
+	return true;
 }
-void APlayerCharacter::MultiPlayerAttackUpdate_Implementation(bool att)
+void APlayerCharacter::MultiPlayerAttackUpdate_Implementation()
 {
+	PalyerAttackUpdate();
 }
 void APlayerCharacter::PalyerAttackUpdate()
 {
+	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	// 실패시 리턴
+	if (nullptr == AnimInstance)
+		return;
+
+	AnimInstance->PlayAttackMontage();
 }

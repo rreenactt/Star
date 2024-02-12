@@ -36,7 +36,7 @@ public:
 	UPROPERTY(ReplicatedUsing = PlayerJumpUpdateCall)
 	bool isJump;
 
-	UPROPERTY(ReplicatedUsing = PlayerAttackUpdateCall)
+	UPROPERTY(Replicated)
 	bool isAttack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -44,10 +44,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isPlayerJump;
+
+	bool isAttacking;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	 
+
+	virtual void PostInitializeComponents() override;
 public:	
 	/** 프로퍼티 리플리케이션 */
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -60,6 +63,9 @@ public:
 
 	void MoveForward(float value);
 	void MoveRight(float value);
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	UFUNCTION()
 	void PlayerSpeedUpdateCall();
@@ -133,7 +139,7 @@ protected:
 	bool ServerPlayerAttackEnd_V(bool att);
 
 	UFUNCTION(Reliable, NetMulticast)
-	virtual void MultiPlayerAttackUpdate(bool att);
-	void MultiPlayerAttackUpdate_Implementation(bool att);
+	virtual void MultiPlayerAttackUpdate();
+	void MultiPlayerAttackUpdate_Implementation();
 
 };
