@@ -255,7 +255,7 @@ void APlayerCharacter::ServerPlayerRunStart_I(bool run)
 	// 관한있는지 확인
 	if (HasAuthority())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 750;
+		GetCharacterMovement()->MaxWalkSpeed = 375;
 		isRun = true;
 	}
 }
@@ -269,7 +269,7 @@ void APlayerCharacter::ServerPlayerRunStop_I(bool run)
 	// 관한있는지 확인
 	if (HasAuthority())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 330;
+		GetCharacterMovement()->MaxWalkSpeed = 125;
 		isRun = false;
 	}
 }
@@ -290,11 +290,11 @@ void APlayerCharacter::PlayerSpeedUpdate()
 	//여기서 현재 작동하는 달리기 값 변환중 
 	if (isRun)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 750;
+		GetCharacterMovement()->MaxWalkSpeed = 375;
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 330;
+		GetCharacterMovement()->MaxWalkSpeed = 125;
 	}
 } 
 
