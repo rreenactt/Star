@@ -163,20 +163,20 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 
 void APlayerCharacter::RunStart()
 {
-	isRun = true;
 	if (GetLocalRole() < ROLE_Authority)
 	{
 		ServerPlayerRunStart(isRun);
 	}
+	isRun = true;
 	PlayerSpeedUpdate();
 }
 void APlayerCharacter::RunStop()
 {
-	isRun = false;
 	if (GetLocalRole() < ROLE_Authority)
 	{
 		ServerPlayerRunStop(isRun);
 	}
+	isRun = false;
 	PlayerSpeedUpdate();
 }
 
@@ -233,7 +233,7 @@ void APlayerCharacter::Die()
 // speed update call 
 void APlayerCharacter::PlayerSpeedUpdateCall() 
 {
-	MultiPlayerSpeedUpdate(isRun); // 멀티케스트 호출	
+	MultiPlayerSpeedUpdate(); // 멀티케스트 호출	
 } 
 //Jump Update call
 void APlayerCharacter::PlayerJumpUpdateCall()
@@ -278,7 +278,7 @@ bool APlayerCharacter::ServerPlayerRunStop_V(bool re)
 	return true;
 }
 // Multicast
-void APlayerCharacter::MultiPlayerSpeedUpdate_Implementation(bool run)
+void APlayerCharacter::MultiPlayerSpeedUpdate_Implementation()
 {
 	// 각 클라이언트가 가지고 있는 PlayerSpeedUpdate() 호출
 	PlayerSpeedUpdate();

@@ -115,8 +115,8 @@ protected:
 	bool ServerPlayerRunStop_V(bool re);
 
 	UFUNCTION(Reliable, NetMulticast)
-	void MultiPlayerSpeedUpdate(bool run);
-	void MultiPlayerSpeedUpdate_Implementation(bool run);
+	void MultiPlayerSpeedUpdate();
+	void MultiPlayerSpeedUpdate_Implementation();
 
 // มกวม Server, multi
 protected:
