@@ -360,7 +360,6 @@ void APlayerCharacter::ServerPlayerAttackStart_I(bool att)
 
 	AnimInstance->PlayAttackMontage();
 	isAttack = true;
-	PlayerAttackUpdateCall();
 }
 bool APlayerCharacter::ServerPlayerAttackStart_V(bool att)
 {
@@ -381,12 +380,21 @@ void APlayerCharacter::MultiPlayerAttackUpdate_Implementation()
 }
 void APlayerCharacter::PalyerAttackUpdate()
 {
-	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	// 실패시 리턴
-	if (nullptr == AnimInstance)
-		return;
+	if (isAttack)
+	{
+		auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		// 실패시 리턴
+		if (nullptr == AnimInstance)
+			return;
 
-	AnimInstance->PlayAttackMontage();
+		AnimInstance->PlayAttackMontage();
+	}
+	else
+	{
+		isAttack = false;
+	}
+
+	
 }
 void APlayerCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {

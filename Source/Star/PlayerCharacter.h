@@ -39,7 +39,7 @@ public:
 	UPROPERTY(ReplicatedUsing = PlayerJumpUpdateCall)
 	bool isJump;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = PlayerAttackUpdateCall)
 	bool isAttack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
