@@ -39,10 +39,6 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	
 	
-	FName WeaponSocket(TEXT("hand_r_wep"));
-	AttackBox = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
-	AttackBox->SetupAttachment(GetMesh(), WeaponSocket);
-	
 	
 	// 리플리케이션 허용
 	bReplicates = true;
@@ -209,7 +205,6 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
-	Die();
 	if (GetLocalRole() < ROLE_Authority && !isAttack)
 	{
 		ServerPlayerAttackStart(isAttack);
@@ -260,7 +255,7 @@ void APlayerCharacter::ServerPlayerRunStart_I(bool run)
 	// 관한있는지 확인
 	if (HasAuthority())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 750;
+		GetCharacterMovement()->MaxWalkSpeed = 375;
 		isRun = true;
 	}
 }
@@ -274,7 +269,7 @@ void APlayerCharacter::ServerPlayerRunStop_I(bool run)
 	// 관한있는지 확인
 	if (HasAuthority())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 330;
+		GetCharacterMovement()->MaxWalkSpeed = 125;
 		isRun = false;
 	}
 }
@@ -295,11 +290,11 @@ void APlayerCharacter::PlayerSpeedUpdate()
 	//여기서 현재 작동하는 달리기 값 변환중 
 	if (isRun)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 750;
+		GetCharacterMovement()->MaxWalkSpeed = 375;
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 330;
+		GetCharacterMovement()->MaxWalkSpeed = 125;
 	}
 } 
 
@@ -361,7 +356,6 @@ void APlayerCharacter::ServerPlayerAttackStart_I(bool att)
 
 	AnimInstance->PlayAttackMontage();
 	isAttack = true;
-	PlayerAttackUpdateCall();
 }
 bool APlayerCharacter::ServerPlayerAttackStart_V(bool att)
 {
@@ -382,13 +376,27 @@ void APlayerCharacter::MultiPlayerAttackUpdate_Implementation()
 }
 void APlayerCharacter::PalyerAttackUpdate()
 {
-	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	// 실패시 리턴
-	if (nullptr == AnimInstance)
-		return;
+	if (isAttack)
+	{
+		auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		// 실패시 리턴
+		if (nullptr == AnimInstance)
+			return;
 
-	AnimInstance->PlayAttackMontage();
+		AnimInstance->PlayAttackMontage();
+	}
+	else
+	{
+		isAttack = false;
+	}
+
+	
 }
 void APlayerCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	Target = Cast<AEntityCharacter>(OtherActor);
+	if (Target)
+	{
+		Target->Die();
+	}
 }

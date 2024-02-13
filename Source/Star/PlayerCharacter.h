@@ -24,9 +24,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Attack)
-	class UStaticMeshComponent* AttackBox;
-
 public:
 
 	/*UPROPERTY(Replicated)
@@ -39,7 +36,7 @@ public:
 	UPROPERTY(ReplicatedUsing = PlayerJumpUpdateCall)
 	bool isJump;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = PlayerAttackUpdateCall)
 	bool isAttack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

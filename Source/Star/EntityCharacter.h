@@ -15,6 +15,8 @@ public:
 	// Sets default values for this character's properties
 	AEntityCharacter();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Attack)
+	class UStaticMeshComponent* AttackBox;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
