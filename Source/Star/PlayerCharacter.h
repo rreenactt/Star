@@ -131,8 +131,8 @@ protected:
 	bool ServerPlayerJumpEnd_V(bool jum);
 
 	UFUNCTION(Reliable, NetMulticast)
-	virtual void MultiPlayerJumpUpdate(bool jump);
-	void MultiPlayerJumpUpdate_Implementation(bool jump);
+	virtual void MultiPlayerJumpUpdate();
+	void MultiPlayerJumpUpdate_Implementation();
 
 protected:
 	UFUNCTION(Reliable, Server = "ServerPlayerAttackStart_I", WithValidation = "ServerPlayerAttackStart_V")
