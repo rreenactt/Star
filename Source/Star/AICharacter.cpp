@@ -34,6 +34,10 @@ void AAICharacter::Die()
 	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
 	GetMesh()->SetSimulatePhysics(true);
 
+}
+
+void AAICharacter::DestroyCharacter()
+{
 	// 김재현 넣음
 	Destroy();
 }
