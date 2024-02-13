@@ -209,7 +209,6 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
-	Die();
 	if (GetLocalRole() < ROLE_Authority && !isAttack)
 	{
 		ServerPlayerAttackStart(isAttack);
@@ -391,4 +390,9 @@ void APlayerCharacter::PalyerAttackUpdate()
 }
 void APlayerCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	Target = Cast<AEntityCharacter>(OtherActor);
+	if (Target)
+	{
+		Target->Die();
+	}
 }
