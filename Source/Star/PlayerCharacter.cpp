@@ -183,7 +183,6 @@ void APlayerCharacter::RunStop()
 void APlayerCharacter::JumpStart()
 {
 	isPlayerJump = true;
-
 	isJump = true;
 	if (GetLocalRole() < ROLE_Authority)
 	{
@@ -194,13 +193,11 @@ void APlayerCharacter::JumpStart()
 void APlayerCharacter::JumpEnd()
 {
 	isPlayerJump = false;
-
 	isJump = false;
 	if (GetLocalRole() < ROLE_Authority)
 	{
 		ServerPlayerJumpEnd(isJump);
 	}
-	PalyerJumpUpdate();
 }
 
 void APlayerCharacter::AttackStart()
@@ -238,7 +235,7 @@ void APlayerCharacter::PlayerSpeedUpdateCall()
 //Jump Update call
 void APlayerCharacter::PlayerJumpUpdateCall()
 {
-	MultiPlayerJumpUpdate(isJump); // 멀티케스트 호출
+	MultiPlayerJumpUpdate(); // 멀티케스트 호출
 }
 //Attack Update call
 void APlayerCharacter::PlayerAttackUpdateCall()
@@ -307,6 +304,7 @@ void APlayerCharacter::ServerPlayerJumpStart_I(bool jump)
 	if (HasAuthority())
 	{
 		Super::Jump();
+		isPlayerJump = true;
 		isJump = true;
 	}
 }
@@ -319,7 +317,7 @@ void APlayerCharacter::ServerPlayerJumpEnd_I(bool jump)
 {
 	if (HasAuthority())
 	{
-		Super::StopJumping();
+		isPlayerJump = false;
 		isJump = false;
 	}
 }
@@ -327,20 +325,22 @@ bool APlayerCharacter::ServerPlayerJumpEnd_V(bool jum)
 {
 	return true;
 }
-void APlayerCharacter::MultiPlayerJumpUpdate_Implementation(bool jump)
+void APlayerCharacter::MultiPlayerJumpUpdate_Implementation()
 {
 	// 각클라이언트들 JumpUpdate 함수 호출
 	PalyerJumpUpdate();
 }
 void APlayerCharacter::PalyerJumpUpdate()
 {
+	if (!isJump)
+	{
+		isPlayerJump = false;
+		return;
+	}
 	if (isJump)
 	{
+		isPlayerJump = true;
 		Super::Jump();
-	}
-	else
-	{
-		Super::StopJumping();
 	}
 }
 
