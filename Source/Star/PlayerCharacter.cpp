@@ -39,10 +39,6 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	
 	
-	FName WeaponSocket(TEXT("hand_r_wep"));
-	AttackBox = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
-	AttackBox->SetupAttachment(GetMesh(), WeaponSocket);
-	
 	
 	// 리플리케이션 허용
 	bReplicates = true;

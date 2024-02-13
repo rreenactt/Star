@@ -10,13 +10,13 @@ AAICharacter::AAICharacter()
 void AAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	FTimerHandle myTimerHandle;
+	/*FTimerHandle myTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
 	{
 		Die();
 
 		GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-	}), 15.0f, false);
+	}), 15.0f, false);*/
 }
 
 void AAICharacter::Tick(float DeltaTime)

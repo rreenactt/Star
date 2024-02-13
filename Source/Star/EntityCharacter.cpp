@@ -10,6 +10,10 @@ AEntityCharacter::AEntityCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FQuat(FRotator(0.0f, -90.0f, 0.0f)));
+
+	FName WeaponSocket(TEXT("hand_r_wep"));
+	AttackBox = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
+	AttackBox->SetupAttachment(GetMesh(), WeaponSocket);
 }
 
 // Called when the game starts or when spawned
