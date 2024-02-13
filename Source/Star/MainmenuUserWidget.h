@@ -15,5 +15,17 @@ class STAR_API UMainmenuUserWidget : public UUserWidget
 	GENERATED_BODY()
 	
 
+public:
 
+	virtual void NativeConstruct() override;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UButton* CreateSessionButton;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UButton* JoinSessionButton;
+
+	void CreateSession();
+
+	void JoinSession();
 };
