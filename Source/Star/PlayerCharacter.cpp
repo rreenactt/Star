@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Character.h"
 #include "MultyPlayerAnimInstance.h"
+#include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 // Sets default values
@@ -37,6 +38,12 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	
+	
+	FName WeaponSocket(TEXT("hand_r_wep"));
+	AttackBox = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
+	AttackBox->SetupAttachment(GetMesh(), WeaponSocket);
+	
+	
 	// 리플리케이션 허용
 	bReplicates = true;
 	// 달리고 있는가
@@ -57,6 +64,9 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 공격 도구가 충돌하면 보내기
+	AttackBox->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnAttackHit);
 }
 
 void APlayerCharacter::PostInitializeComponents()
@@ -154,6 +164,7 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 	JumpEnd();
 }
 
+
 void APlayerCharacter::RunStart()
 {
 	isRun = true;
@@ -198,6 +209,7 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
+	Die();
 	if (GetLocalRole() < ROLE_Authority && !isAttack)
 	{
 		ServerPlayerAttackStart(isAttack);
@@ -213,6 +225,11 @@ void APlayerCharacter::AttackEnd()
 		ServerPlayerAttackEnd(isAttack);
 	}
 	isAttack = false;
+}
+
+void APlayerCharacter::Die()
+{
+	UE_LOG(LogTemp, Warning, TEXT("die"));
 }
 
 /////////////////////////////////////////////////////////////// 기능 구현 부분
@@ -371,4 +388,7 @@ void APlayerCharacter::PalyerAttackUpdate()
 		return;
 
 	AnimInstance->PlayAttackMontage();
+}
+void APlayerCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
 }

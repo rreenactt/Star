@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "EntityCharacter.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
-class STAR_API APlayerCharacter : public ACharacter
+class STAR_API APlayerCharacter : public AEntityCharacter
 {
 	GENERATED_BODY()
 
@@ -23,6 +24,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Attack)
+	class UStaticMeshComponent* AttackBox;
 
 public:
 
@@ -81,6 +84,9 @@ public:
 
 	UFUNCTION()
 	virtual void Landed(const FHitResult& Hit);
+
+	UFUNCTION()
+	void OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 protected:
 	UFUNCTION()
 	void RunStart();
@@ -95,7 +101,11 @@ protected:
 	void AttackStart();
 	void AttackEnd();
 
-// 달리기 Server, multi
+	virtual void Die() override;
+
+	UPROPERTY()
+	AEntityCharacter* Target;
+	// 달리기 Server, multi
 protected:
 	UFUNCTION(Reliable, Server = "ServerPlayerRunStart_I", WithValidation = "ServerPlayerRunStart_V")
 	virtual void ServerPlayerRunStart(bool run);

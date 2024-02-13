@@ -28,4 +28,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 public:
 	virtual void Die() override;
+
+private:
+	void DestroyCharacter();
 };
