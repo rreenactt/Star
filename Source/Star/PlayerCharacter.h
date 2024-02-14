@@ -73,7 +73,9 @@ public:
 	void PlayerJumpUpdateCall();
 	UFUNCTION()
 	void PlayerAttackUpdateCall();
-
+	UFUNCTION()
+	void PlayerDieCall();
+	
 	UFUNCTION()
 	void PlayerSpeedUpdate();
 	void PalyerJumpUpdate();
@@ -152,4 +154,15 @@ protected:
 	virtual void MultiPlayerAttackUpdate();
 	void MultiPlayerAttackUpdate_Implementation();
 
+protected:
+	UFUNCTION(Reliable, Server = "ServerKill_I", WithValidation = "ServerKill_V")
+	virtual void ServerKill();
+	void ServerKill_I();
+	bool ServerKill_V();
+
+	UFUNCTION(Reliable, NetMulticast)
+	virtual void MultiKill();
+	void MultiKill_Implementation();
+
 };
+ /////// attacking 다시해서 공격하때만 죽게하기

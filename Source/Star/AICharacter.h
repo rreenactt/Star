@@ -29,6 +29,17 @@ public:
 public:
 	virtual void Die() override;
 
-private:
-	void DestroyCharacter();
+protected:
+
+	UFUNCTION()
+	void AiDiecall();
+
+	UFUNCTION(Reliable, Server = "ServerAiDie_I", WithValidation = "ServerAiDie_V")
+	virtual void ServerAiDie();
+	void ServerAiDie_I();
+	bool ServerAiDie_V();
+
+	UFUNCTION(Reliable, NetMulticast)
+	virtual void MultiAiDie();
+	void MultiAiDie_Implementation();
 };

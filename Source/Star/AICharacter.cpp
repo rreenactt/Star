@@ -2,6 +2,7 @@
 
 
 #include "AICharacter.h"
+#include "Net/UnrealNetwork.h"
 
 AAICharacter::AAICharacter()
 {
@@ -33,10 +34,28 @@ void AAICharacter::Die()
 {
 	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
 	GetMesh()->SetSimulatePhysics(true);
-
+	ServerAiDie();
 }
 
-void AAICharacter::DestroyCharacter()
+void AAICharacter::AiDiecall()
 {
-	Destroy();
+	MultiAiDie();
+}
+
+void AAICharacter::ServerAiDie_I()
+{
+	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
+	GetMesh()->SetSimulatePhysics(true);
+	AiDiecall();
+}
+
+bool AAICharacter::ServerAiDie_V()
+{
+	return true;
+}
+
+void AAICharacter::MultiAiDie_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
+	GetMesh()->SetSimulatePhysics(true);
 }
