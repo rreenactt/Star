@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+//#include "Interfaces/OnlineSessionInterface.h"
 #include "MainmenuUserWidget.generated.h"
 
 /**
@@ -19,6 +20,8 @@ public:
 
 	virtual void NativeConstruct() override;
 
+protected:
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* CreateSessionButton;
 
@@ -26,11 +29,16 @@ public:
 	class UButton* JoinSessionButton;
 
 	UFUNCTION()
-	void CreateSession();
+	void StartCreateSession();
 
 	UFUNCTION()
 	void JoinSession();
 
+	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+
+	//IOnlineSessionPtr OnlineSessionInterface;
+
+	//FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
 private:
 	UGameInstance* GameInstance;
 };
