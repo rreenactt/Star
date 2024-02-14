@@ -223,8 +223,8 @@ void APlayerCharacter::AttackEnd()
 
 void APlayerCharacter::Die()
 {
-	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
 	GetMesh()->SetSimulatePhysics(true);
+	ServerKill();
 }
 
 /////////////////////////////////////////////////////////////// 기능 구현 부분
@@ -244,6 +244,11 @@ void APlayerCharacter::PlayerJumpUpdateCall()
 void APlayerCharacter::PlayerAttackUpdateCall()
 {
 	MultiPlayerAttackUpdate();
+}
+
+void APlayerCharacter::PlayerDieCall()
+{
+	MultiKill();
 }
 
 /////////////////////////////////////////////////////////////// RUN
@@ -359,6 +364,8 @@ void APlayerCharacter::ServerPlayerAttackStart_I(bool att)
 
 	AnimInstance->PlayAttackMontage();
 	isAttack = true;
+	isAttacking = true;
+
 }
 bool APlayerCharacter::ServerPlayerAttackStart_V(bool att)
 {
@@ -367,7 +374,7 @@ bool APlayerCharacter::ServerPlayerAttackStart_V(bool att)
 void APlayerCharacter::ServerPlayerAttackEnd_I(bool att)
 {
 	isAttack = false;
-
+	isAttacking = false;
 }
 bool APlayerCharacter::ServerPlayerAttackEnd_V(bool att)
 {
@@ -400,26 +407,38 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!isAttacking)
-		return;
-	if (OtherActor == this)
+
+	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this && OtherActor == NULL || !isAttacking || OtherActor == this)
 	{
 		return;
 	}
+
+	// AI
 	Target = Cast<AAICharacter>(OtherActor);
 	if (Target)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("in Die call"));
 		Target->Die();
 	}
 	else
 	{
+		// 상대 플레이어
 		Target = Cast<APlayerCharacter>(OtherActor);
 		if (Target)
 		{
 			Target->Die();
-
 		}
-
 	}
+}
+void APlayerCharacter::ServerKill_I()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	PlayerDieCall();
+}
+bool APlayerCharacter::ServerKill_V()
+{
+	return true;
+}
+void APlayerCharacter::MultiKill_Implementation()
+{
+	GetMesh()->SetSimulatePhysics(true);
 }
