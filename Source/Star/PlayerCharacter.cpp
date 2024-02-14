@@ -83,6 +83,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, isRun);
 	DOREPLIFETIME(APlayerCharacter, isJump);
 	DOREPLIFETIME(APlayerCharacter, isAttack);
+	DOREPLIFETIME(APlayerCharacter, isAttacking);
 }
 
 // Called every frame
@@ -218,6 +219,7 @@ void APlayerCharacter::AttackEnd()
 	{
 		ServerPlayerAttackEnd(isAttack);
 	}
+	isAttacking = false;
 	isAttack = false;
 }
 

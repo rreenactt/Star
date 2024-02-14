@@ -38,14 +38,14 @@ public:
 
 	UPROPERTY(ReplicatedUsing = PlayerAttackUpdateCall)
 	bool isAttack;
-
+	UPROPERTY(Replicated)
+	bool isAttacking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isFalling;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isPlayerJump;
 
-	bool isAttacking;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -165,4 +165,3 @@ protected:
 	void MultiKill_Implementation();
 
 };
- /////// attacking 다시해서 공격하때만 죽게하기
