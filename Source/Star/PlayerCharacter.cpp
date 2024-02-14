@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Character.h"
 #include "MultyPlayerAnimInstance.h"
+#include "AICharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
@@ -62,7 +63,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 공격 도구가 충돌하면 보내기
-	AttackBox->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnAttackHit);
+	AttackBox->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
 }
 
 void APlayerCharacter::PostInitializeComponents()
@@ -206,6 +207,7 @@ void APlayerCharacter::AttackStart()
 	{
 		ServerPlayerAttackStart(isAttack);
 	}
+	isAttacking = true;
 	isAttack = true;
 	PalyerAttackUpdate();
 }
@@ -221,7 +223,8 @@ void APlayerCharacter::AttackEnd()
 
 void APlayerCharacter::Die()
 {
-	UE_LOG(LogTemp, Warning, TEXT("die"));
+	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
+	GetMesh()->SetSimulatePhysics(true);
 }
 
 /////////////////////////////////////////////////////////////// 기능 구현 부분
@@ -387,16 +390,36 @@ void APlayerCharacter::PalyerAttackUpdate()
 	}
 	else
 	{
+		isAttacking = false;
 		isAttack = false;
 	}
 
 	
 }
-void APlayerCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* OverlappedComp,
+	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Target = Cast<AEntityCharacter>(OtherActor);
+	if (!isAttacking)
+		return;
+	if (OtherActor == this)
+	{
+		return;
+	}
+	Target = Cast<AAICharacter>(OtherActor);
 	if (Target)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("in Die call"));
 		Target->Die();
+	}
+	else
+	{
+		Target = Cast<APlayerCharacter>(OtherActor);
+		if (Target)
+		{
+			Target->Die();
+
+		}
+
 	}
 }
