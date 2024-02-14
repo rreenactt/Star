@@ -17,10 +17,13 @@ void UMainmenuUserWidget::NativeConstruct()
 	
 	JoinSessionButton = (UButton*)GetWidgetFromName(TEXT("JoinSessionButton"));
 	JoinSessionButton->OnClicked.AddDynamic(this, &UMainmenuUserWidget::JoinSession);
+
+	GameInstance = GetGameInstance();
 }
 
 void UMainmenuUserWidget::CreateSession()
 {
+	
 	GEngine->AddOnScreenDebugMessage(1, 1.5f, FColor::Red, TEXT("Create Session Test"));
 }
 

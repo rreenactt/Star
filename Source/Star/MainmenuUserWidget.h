@@ -19,13 +19,18 @@ public:
 
 	virtual void NativeConstruct() override;
 
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget))
 	class UButton* CreateSessionButton;
 
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinSessionButton;
 
+	UFUNCTION()
 	void CreateSession();
 
+	UFUNCTION()
 	void JoinSession();
+
+private:
+	UGameInstance* GameInstance;
 };
