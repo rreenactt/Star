@@ -38,6 +38,5 @@ void AAICharacter::Die()
 
 void AAICharacter::DestroyCharacter()
 {
-	// 김재현 넣음
 	Destroy();
 }
