@@ -204,7 +204,7 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
-	if (GetLocalRole() < ROLE_Authority && !isAttack)
+	if (GetLocalRole() < ROLE_Authority && !isAttack && !isAttacking)
 	{
 		ServerPlayerAttackStart(isAttack);
 	}
