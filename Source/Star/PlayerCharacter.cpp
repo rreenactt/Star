@@ -63,7 +63,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 공격 도구가 충돌하면 보내기
-	AttackBox->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
+	Weapon->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
 }
 
 void APlayerCharacter::PostInitializeComponents()
