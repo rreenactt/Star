@@ -10,47 +10,47 @@ AEntityCharacter::AEntityCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-    PlayerMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
-    PlayerMesh->SetupAttachment(RootComponent);
+    //PlayerMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+    //PlayerMesh->SetupAttachment(RootComponent);
 
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FQuat(FRotator(0.0f, -90.0f, 0.0f)));
 
 	FName WeaponSocket(TEXT("RightHandIndex2"));
 	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
-	Weapon->SetupAttachment(PlayerMesh, WeaponSocket);
+	Weapon->SetupAttachment(GetMesh(), WeaponSocket);
 
     // Åä³¢ ¸Þ½¬
-        static ConstructorHelpers::FObjectFinder<USkeletalMeshComponent> RadbitMesh(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));//¾È´Æ
+        static ConstructorHelpers::FObjectFinder<USkeletalMesh> RadbitMesh(TEXT("/Game/Mycontents/Character/Rabbit/Rabbit_Character_Rigged_.Rabbit_Character_Rigged_"));
     if (RadbitMesh.Succeeded())
     {
         Character_Radbit = RadbitMesh.Object;
     }
     // ´Ù¶÷Áã ¸Þ½¬
-        static ConstructorHelpers::FObjectFinder<USkeletalMeshComponent> SquirrelMesh(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));// ¾È´Æ
+        static ConstructorHelpers::FObjectFinder<USkeletalMesh> SquirrelMesh(TEXT("/Game/Mycontents/Character/Squirrel/Squirrel__Rigged__.Squirrel__Rigged__"));
     if (SquirrelMesh.Succeeded())
     {
-        Character_Radbit = SquirrelMesh.Object;
+        Character_Squirrel = SquirrelMesh.Object;
     }
     // ºÏ±Ø°õ ¸Þ½¬
-        static ConstructorHelpers::FObjectFinder<USkeletalMeshComponent> PolarBearMesh(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));// ¾È´Æ
+        static ConstructorHelpers::FObjectFinder<USkeletalMesh> PolarBearMesh(TEXT("/Game/Mycontents/Character/PolarBear/_PolarBear_Rigged_._PolarBear_Rigged_"));
     if (PolarBearMesh.Succeeded())
     {
         Character_Polarbear = PolarBearMesh.Object;
     }
-    // Åä³¢ ¾Ö´Ï¸ÞÀÌ¼ÇÀÎ½ºÅÏ½º
+    // Åä³¢¹«±â
         static ConstructorHelpers::FObjectFinder<UStaticMeshComponent> RadbitWeapon(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));// ¾È´Æ
     if (RadbitWeapon.Succeeded())
     {
         Weapon_Radbit = RadbitWeapon.Object;
     }
-    // ´Ù¶÷Áã ¾Ö´Ï¸ÞÀÌ¼ÇÀÎ½ºÅÏ½º
+    // ´Ù¶÷Áã ¹«±â
         static ConstructorHelpers::FObjectFinder<UStaticMeshComponent> SquirrelWeapon(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));// ¾È´Æ
     if (SquirrelWeapon.Succeeded())
     {
         Weapon_Squirrel = SquirrelWeapon.Object;
     }
-    // ´Ù¶÷Áã ¾Ö´Ï¸ÞÀÌ¼ÇÀÎ½ºÅÏ½º
+    // ºÏ±Ø°õ ¹«±â
     static ConstructorHelpers::FObjectFinder<UStaticMeshComponent> PolarBearWeapon(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));// ¾È´Æ
     if (PolarBearWeapon.Succeeded())
     {
@@ -93,6 +93,24 @@ void AEntityCharacter::ChangeCharacter(int32 Number)
     }
    
 }
+void AEntityCharacter::Change(int32 Number)
+{
+    int32 CharNum = Number;
+
+    switch (CharNum) {
+    case 1:
+        GetMesh()->SetSkeletalMeshAsset(Character_Radbit);
+        break;
+    case 2:
+        GetMesh()->SetSkeletalMeshAsset(Character_Squirrel);
+        break;
+    case 3:
+        GetMesh()->SetSkeletalMeshAsset(Character_Polarbear);
+        break;
+    default:
+        return;
+    }
+}
 /// <summary>
 /// ////////////////////////////////////////////////////////////////////// Ã¹¹øÂ° Ä³¸¯ÅÍ 
 /// </summary>
@@ -102,17 +120,18 @@ void AEntityCharacter::Server_CharacterChange_I(int32 CharacterNum)
 
     switch (CharNum) {
     case 1:
-        
+        GetMesh()->SetSkeletalMeshAsset(Character_Radbit);
         break;
     case 2:
-
+        GetMesh()->SetSkeletalMeshAsset(Character_Squirrel);
         break;
     case 3:
-
+        GetMesh()->SetSkeletalMeshAsset(Character_Polarbear);
         break;
     default:
         return;
     }
+    Multi_CharacterChange(CharacterNum);
 }
 
 bool AEntityCharacter::Server_CharacterChange_V(int32 CharacterNum)
@@ -122,5 +141,7 @@ bool AEntityCharacter::Server_CharacterChange_V(int32 CharacterNum)
 
 void AEntityCharacter::Multi_CharacterChange_Implementation(int32 CharacterNum)
 {
+
+    Change(CharacterNum);
 }
 

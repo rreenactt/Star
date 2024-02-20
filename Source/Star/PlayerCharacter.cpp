@@ -118,6 +118,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// 공격
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::AttackStart);
 
+	// 변신
+	PlayerInputComponent->BindAction("Radbit", IE_Pressed, this, &APlayerCharacter::CharacterChangeRadbit);
+	PlayerInputComponent->BindAction("Squirrel", IE_Pressed, this, &APlayerCharacter::CharacterChangeSquirrel);
+	PlayerInputComponent->BindAction("Polarbear", IE_Pressed, this, &APlayerCharacter::CharacterChangePolarbear);
+
+
 }
 
 
@@ -223,12 +229,28 @@ void APlayerCharacter::AttackEnd()
 	isAttack = false;
 }
 
+
 void APlayerCharacter::Die()
 {
 	GetMesh()->SetSimulatePhysics(true);
 	ServerKill();
 }
 
+///////////////////////////////////////////// 캐릭터 바꾸기
+void APlayerCharacter::CharacterChangeRadbit()
+{
+	ChangeCharacter(1);
+}
+
+void APlayerCharacter::CharacterChangeSquirrel()
+{
+	ChangeCharacter(2);
+}
+
+void APlayerCharacter::CharacterChangePolarbear()
+{
+	ChangeCharacter(3);
+}
 /////////////////////////////////////////////////////////////// 기능 구현 부분
 
 // 변수가 변했을때 호출하는 함수 부분

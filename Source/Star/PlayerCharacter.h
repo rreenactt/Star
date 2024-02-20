@@ -103,6 +103,11 @@ protected:
 	void AttackStart();
 	void AttackEnd();
 
+	UFUNCTION()
+	void CharacterChangeRadbit();
+	void CharacterChangeSquirrel();
+	void CharacterChangePolarbear();
+
 	virtual void Die() override;
 
 	UPROPERTY()
