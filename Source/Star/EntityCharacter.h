@@ -27,13 +27,13 @@ public:
 
 	// 캐릭터 주머니
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
-	class USkeletalMeshComponent* Character_Radbit;
+	class USkeletalMesh* Character_Radbit;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
-	class USkeletalMeshComponent* Character_Squirrel;
+	class USkeletalMesh* Character_Squirrel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
-	class USkeletalMeshComponent* Character_Polarbear;
+	class USkeletalMesh* Character_Polarbear;
 
 	// 애니메이션 주머니
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AnimBlueprint)
@@ -57,7 +57,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION()
 	virtual void ChangeCharacter(int32 Number);
+
+	UFUNCTION()
+	virtual void Change(int32 Number);
 
 	virtual void Die() PURE_VIRTUAL(AEntityCharacter::Die, );
 
