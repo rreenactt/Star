@@ -19,42 +19,46 @@ AEntityCharacter::AEntityCharacter()
 	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
 	Weapon->SetupAttachment(GetMesh(), WeaponSocket);
 
-    // Åä³¢ ¸Þ½¬
-        static ConstructorHelpers::FObjectFinder<USkeletalMesh> RadbitMesh(TEXT("/Game/Mycontents/Character/Rabbit/Rabbit_Character_Rigged_.Rabbit_Character_Rigged_"));
-    if (RadbitMesh.Succeeded())
-    {
-        Character_Radbit = RadbitMesh.Object;
-    }
-    // ´Ù¶÷Áã ¸Þ½¬
-        static ConstructorHelpers::FObjectFinder<USkeletalMesh> SquirrelMesh(TEXT("/Game/Mycontents/Character/Squirrel/Squirrel__Rigged__.Squirrel__Rigged__"));
-    if (SquirrelMesh.Succeeded())
-    {
-        Character_Squirrel = SquirrelMesh.Object;
-    }
-    // ºÏ±Ø°õ ¸Þ½¬
-        static ConstructorHelpers::FObjectFinder<USkeletalMesh> PolarBearMesh(TEXT("/Game/Mycontents/Character/PolarBear/PolarBear_Rigged_.PolarBear_Rigged_"));
-    if (PolarBearMesh.Succeeded())
-    {
-        Character_Polarbear = PolarBearMesh.Object;
-    }
-    // Åä³¢¹«±â
-        static ConstructorHelpers::FObjectFinder<UStaticMesh> RadbitWeapon(TEXT("/Game/Mycontents/Character/Weapon/Carrot_Knife/Carrot_Knife_.Carrot_Knife_"));
-    if (RadbitWeapon.Succeeded())
-    {
-        Weapon_Radbit = RadbitWeapon.Object;
-    }
-    // ´Ù¶÷Áã ¹«±â
-        static ConstructorHelpers::FObjectFinder<UStaticMesh> SquirrelWeapon(TEXT("/Game/Mycontents/Character/Weapon/acorn_Knife/acornKnife.acornKnife"));
-    if (SquirrelWeapon.Succeeded())
-    {
-        Weapon_Squirrel = SquirrelWeapon.Object;
-    }
-    // ºÏ±Ø°õ ¹«±â
-    static ConstructorHelpers::FObjectFinder<UStaticMesh> PolarBearWeapon(TEXT("/Game/Mycontents/Character/Weapon/tuna_Knife/tunaKnife.tunaKnife"));
-    if (PolarBearWeapon.Succeeded())
-    {
-        Weapon_Polarbear = PolarBearWeapon.Object;
-    }
+    //// Åä³¢ ¸Þ½¬
+    //    static ConstructorHelpers::FObjectFinder<USkeletalMesh> RadbitMesh(TEXT("/Game/Mycontents/Character/Rabbit/Rabbit_Character_Rigged_.Rabbit_Character_Rigged_"));
+    //if (RadbitMesh.Succeeded())
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("in RadbitMesh"));
+
+    //    Character_Radbit = RadbitMesh.Object;
+    //}
+    //// ´Ù¶÷Áã ¸Þ½¬
+    //    static ConstructorHelpers::FObjectFinder<USkeletalMesh> SquirrelMesh(TEXT("/Game/Mycontents/Character/Squirrel/Squirrel__Rigged__.Squirrel__Rigged__"));
+    //if (SquirrelMesh.Succeeded())
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("in SquirrelMesh"));
+
+    //    Character_Squirrel = SquirrelMesh.Object;
+    //}
+    //// ºÏ±Ø°õ ¸Þ½¬
+    //    static ConstructorHelpers::FObjectFinder<USkeletalMesh> PolarBearMesh(TEXT("/Game/Mycontents/Character/PolarBear/PolarBear_Rigged_.PolarBear_Rigged_"));
+    //if (PolarBearMesh.Succeeded())
+    //{
+    //    Character_Polarbear = PolarBearMesh.Object;
+    //}
+    //// Åä³¢¹«±â
+    //    static ConstructorHelpers::FObjectFinder<UStaticMesh> RadbitWeapon(TEXT("/Game/Mycontents/Character/Weapon/Carrot_Knife/Carrot_Knife_.Carrot_Knife_"));
+    //if (RadbitWeapon.Succeeded())
+    //{
+    //    Weapon_Radbit = RadbitWeapon.Object;
+    //}
+    //// ´Ù¶÷Áã ¹«±â
+    //    static ConstructorHelpers::FObjectFinder<UStaticMesh> SquirrelWeapon(TEXT("/Game/Mycontents/Character/Weapon/acorn_Knife/acornKnife.acornKnife"));
+    //if (SquirrelWeapon.Succeeded())
+    //{
+    //    Weapon_Squirrel = SquirrelWeapon.Object;
+    //}
+    //// ºÏ±Ø°õ ¹«±â
+    //static ConstructorHelpers::FObjectFinder<UStaticMesh> PolarBearWeapon(TEXT("/Game/Mycontents/Character/Weapon/tuna_Knife/tunaKnife.tunaKnife"));
+    //if (PolarBearWeapon.Succeeded())
+    //{
+    //    Weapon_Polarbear = PolarBearWeapon.Object;
+    //}
 }
 
 // Called when the game starts or when spawned

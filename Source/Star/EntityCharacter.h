@@ -21,28 +21,24 @@ public:
 	class UStaticMeshComponent* Weapon;
 
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SkeletalMesh)
-	class USkeletalMeshComponent* PlayerMesh;
-
-
 	// 캐릭터 주머니
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
 	class USkeletalMesh* Character_Radbit;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
 	class USkeletalMesh* Character_Squirrel;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CharcaterMesh)
 	class USkeletalMesh* Character_Polarbear;
 
 	// 애니메이션 주머니
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AnimBlueprint)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeanponMesh)
 	class UStaticMesh* Weapon_Radbit;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AnimBlueprint)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeanponMesh)
 	class UStaticMesh* Weapon_Squirrel;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AnimBlueprint)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeanponMesh)
 	class UStaticMesh* Weapon_Polarbear;
 
 protected:
