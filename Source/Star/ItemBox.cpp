@@ -49,5 +49,6 @@ void AItemBox::PostInitializeComponents()
 
 void AItemBox::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+    //여기 부분에 if문으로 캐릭터가 공격중(isAttacking)이 아니면 return하는 구문 필요함
 	UE_LOG(LogTemp, Warning, TEXT("Touch"));
 }
