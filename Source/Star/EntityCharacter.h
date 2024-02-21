@@ -37,13 +37,13 @@ public:
 
 	// 애니메이션 주머니
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AnimBlueprint)
-	class UStaticMeshComponent* Weapon_Radbit;
+	class UStaticMesh* Weapon_Radbit;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AnimBlueprint)
-	class UStaticMeshComponent* Weapon_Squirrel;
+	class UStaticMesh* Weapon_Squirrel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AnimBlueprint)
-	class UStaticMeshComponent* Weapon_Polarbear;
+	class UStaticMesh* Weapon_Polarbear;
 
 protected:
 	// Called when the game starts or when spawned
