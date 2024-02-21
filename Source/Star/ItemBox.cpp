@@ -11,9 +11,11 @@ AItemBox::AItemBox()
 
     Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("TRIGGER"));
     Box = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BOX"));
+    Effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EFFECT"));
 
     RootComponent = Trigger;
     Box->SetupAttachment(RootComponent);
+    Effect->SetupAttachment(RootComponent);
 
     Trigger->SetBoxExtent(FVector(40.0f, 42.0f, 30.0f));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BOX(TEXT("/Game/InfinityBladeGrassLands/Environments/Breakables/StaticMesh/Box/SM_Env_Breakables_Box1.SM_Env_Breakables_Box1"));
@@ -21,6 +23,14 @@ AItemBox::AItemBox()
     {
         Box->SetStaticMesh(SM_BOX.Object);
     }
+
+    static ConstructorHelpers::FObjectFinder<UParticleSystem> P_CHESTOPEN(TEXT("/Game/InfinityBladeGrassLands/Effects/FX_Treasure/Chest/P_TreasureChest_Open_Mesh.P_TreasureChest_Open_Mesh"));
+    if (P_CHESTOPEN.Succeeded())
+    {
+        Effect->SetTemplate(P_CHESTOPEN.Object);
+        //Effect->bAutoActivate = true;
+    }
+
     Box->SetRelativeLocation(FVector(0.0f, -3.5f, -30.0f));
 
     Trigger->SetCollisionProfileName(TEXT("ItemBox"));
@@ -38,7 +48,8 @@ void AItemBox::BeginPlay()
 void AItemBox::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+    //UE_LOG(LogTemp, Warning, TEXT("Test"));
+    //Effect->Activate(true);
 }
 
 void AItemBox::PostInitializeComponents()
@@ -51,4 +62,6 @@ void AItemBox::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor* O
 {
     //여기 부분에 if문으로 캐릭터가 공격중(isAttacking)이 아니면 return하는 구문 필요함
 	UE_LOG(LogTemp, Warning, TEXT("Touch"));
+
+    //Effect->Activate(false);
 }
