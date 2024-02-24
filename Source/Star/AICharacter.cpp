@@ -3,27 +3,25 @@
 
 #include "AICharacter.h"
 #include "MyAIController.h"
+#include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AAICharacter::AAICharacter()
 {
+	isDie = false;
 }
 
 void AAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CanChangeAi();
 }
 
 void AAICharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//FTimerHandle myTimerHandle;
-	//GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
-	//{
-	//	ChangeAiCharacter();
-
-	//	GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-	//}), 5.0f, false);
+	
 }
 
 void AAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -38,9 +36,46 @@ void AAICharacter::Die()
 	ServerAiDie();
 }
 
+void AAICharacter::DieProcedure()
+{
+	// 캡슐콜리전 삭제
+	UCapsuleComponent* AiCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
+	// 컨트롤러 삭제
+	AAIController* Aicontroller = Cast<AAIController>(GetController());
+	if (Aicontroller && AiCapsuleComponent)
+	{
+		GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
+		isDie = true;
+		Aicontroller->Destroyed();
+		AiCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	GetMesh()->SetSimulatePhysics(true);
+}
+
 void AAICharacter::AiDiecall()
 {
 	MultiAiDie();
+}
+
+void AAICharacter::CanChangeAi()
+{
+	FTimerHandle myTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		int32 RandomNum = FMath::RandRange(1, 5);
+		if (RandomNum == 1)
+		{
+			ChangeAiCharacter();
+
+		}
+		if (!isDie)
+		{
+			return CanChangeAi();
+		}
+		
+		GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+	}), 2.0f, false);
+	
 }
 
 void AAICharacter::ChangeAiCharacter()
@@ -52,13 +87,16 @@ void AAICharacter::ChangeAiCharacter()
 
 void AAICharacter::ServerAiDie_I()
 {
-	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
-	//// 콜리전 삭제
+	// 캡슐콜리전 삭제
+	UCapsuleComponent* AiCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	// 컨트롤러 삭제
 	AAIController* Aicontroller = Cast<AAIController>(GetController());
-	if (Aicontroller)
+	if (Aicontroller && AiCapsuleComponent)
 	{
+		GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
+		isDie = true;
 		Aicontroller->Destroyed();
+		AiCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	GetMesh()->SetSimulatePhysics(true);
 	AiDiecall();
@@ -71,6 +109,5 @@ bool AAICharacter::ServerAiDie_V()
 
 void AAICharacter::MultiAiDie_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
-	GetMesh()->SetSimulatePhysics(true);
+	DieProcedure();
 }

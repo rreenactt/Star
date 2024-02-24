@@ -53,6 +53,9 @@ APlayerCharacter::APlayerCharacter()
 	isAttack = false;
 	// 공격 중인가
 	isAttacking = false;
+
+	// 공격 할 수 있는가
+	isCanAttack = true;
 }
 
 // Called when the game starts or when spawned
@@ -208,10 +211,15 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
+	if (!isCanAttack)
+	{
+		return;
+	}
 	if (GetLocalRole() < ROLE_Authority && !isAttack && !isAttacking)
 	{
 		ServerPlayerAttackStart(isAttack);
 	}
+	isCanAttack = false;
 	isAttacking = true;
 	isAttack = true;
 	PalyerAttackUpdate();
@@ -225,6 +233,13 @@ void APlayerCharacter::AttackEnd()
 	}
 	isAttacking = false;
 	isAttack = false;
+	FTimerHandle myTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+			CanAttack();
+
+	GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+	}), 0.7f, false);
 }
 
 
@@ -234,20 +249,34 @@ void APlayerCharacter::Die()
 	ServerKill();
 }
 
+void APlayerCharacter::CanAttack()
+{
+	isCanAttack = true;
+}
+
 ///////////////////////////////////////////// 캐릭터 바꾸기
 void APlayerCharacter::CharacterChangeRadbit()
 {
-	ChangeCharacter(1);
+	if (isCanAttack)
+	{
+		ChangeCharacter(1);
+	}
 }
 
 void APlayerCharacter::CharacterChangeSquirrel()
 {
-	ChangeCharacter(2);
+	if (isCanAttack)
+	{
+		ChangeCharacter(2);
+	}
 }
 
 void APlayerCharacter::CharacterChangePolarbear()
 {
-	ChangeCharacter(3);
+	if (isCanAttack)
+	{
+		ChangeCharacter(3);
+	}
 }
 /////////////////////////////////////////////////////////////// 기능 구현 부분
 
@@ -362,6 +391,10 @@ void APlayerCharacter::MultiPlayerJumpUpdate_Implementation()
 }
 void APlayerCharacter::PalyerJumpUpdate()
 {
+	if (isFalling)
+	{
+		return;
+	}
 	if (!isJump)
 	{
 		isPlayerJump = false;
