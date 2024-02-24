@@ -162,6 +162,7 @@ void APlayerCharacter::MoveRight(float value)
 void APlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	AttackEnd();
+	UE_LOG(LogTemp, Warning, TEXT("End Montage"));
 }
 // 착지, 지면에 닿으면 호출되는 함수
 void APlayerCharacter::Landed(const FHitResult& Hit)
@@ -219,6 +220,13 @@ void APlayerCharacter::AttackStart()
 	{
 		ServerPlayerAttackStart(isAttack);
 	}
+	FTimerHandle myTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			CanAttack();
+
+			GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+		}), 1.8f, false);
 	isCanAttack = false;
 	isAttacking = true;
 	isAttack = true;
@@ -233,13 +241,6 @@ void APlayerCharacter::AttackEnd()
 	}
 	isAttacking = false;
 	isAttack = false;
-	FTimerHandle myTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
-	{
-			CanAttack();
-
-	GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-	}), 0.7f, false);
 }
 
 
@@ -268,6 +269,7 @@ void APlayerCharacter::CharacterChangeSquirrel()
 	if (isCanAttack)
 	{
 		ChangeCharacter(2);
+
 	}
 }
 
@@ -276,6 +278,7 @@ void APlayerCharacter::CharacterChangePolarbear()
 	if (isCanAttack)
 	{
 		ChangeCharacter(3);
+
 	}
 }
 /////////////////////////////////////////////////////////////// 기능 구현 부분
