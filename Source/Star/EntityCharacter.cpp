@@ -10,15 +10,10 @@ AEntityCharacter::AEntityCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-    //PlayerMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
-    //PlayerMesh->SetupAttachment(RootComponent);
 
 
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FQuat(FRotator(0.0f, -90.0f, 0.0f)));
-
-	FName WeaponSocket(TEXT("RightHandIndex2"));
 	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
-	Weapon->SetupAttachment(GetMesh(), WeaponSocket);
+	FName WeaponSocket(TEXT("RightHandIndex2"));
 
     // Åä³¢ ¸Þ½¬
         static ConstructorHelpers::FObjectFinder<USkeletalMesh> RadbitMesh(TEXT("/Game/Mycontents/Character/Rabbit/Rabbit_Character_Rigged_.Rabbit_Character_Rigged_"));
@@ -33,42 +28,47 @@ AEntityCharacter::AEntityCharacter()
         Character_Squirrel = SquirrelMesh.Object;
     }
     // ºÏ±Ø°õ ¸Þ½¬
-        static ConstructorHelpers::FObjectFinder<USkeletalMesh> PolarBearMesh(TEXT("/Game/Mycontents/Character/PolarBear/_PolarBear_Rigged_._PolarBear_Rigged_"));
+        static ConstructorHelpers::FObjectFinder<USkeletalMesh> PolarBearMesh(TEXT("/Game/Mycontents/Character/PolarBear/PolarBear_Rigged_.PolarBear_Rigged_"));
     if (PolarBearMesh.Succeeded())
     {
         Character_Polarbear = PolarBearMesh.Object;
     }
     // Åä³¢¹«±â
-        static ConstructorHelpers::FObjectFinder<UStaticMeshComponent> RadbitWeapon(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));// ¾È´Æ
+        static ConstructorHelpers::FObjectFinder<UStaticMesh> RadbitWeapon(TEXT("/Game/Mycontents/Character/Weapon/Carrot_Knife/Carrot_Knife_.Carrot_Knife_"));
     if (RadbitWeapon.Succeeded())
     {
         Weapon_Radbit = RadbitWeapon.Object;
     }
     // ´Ù¶÷Áã ¹«±â
-        static ConstructorHelpers::FObjectFinder<UStaticMeshComponent> SquirrelWeapon(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));// ¾È´Æ
+        static ConstructorHelpers::FObjectFinder<UStaticMesh> SquirrelWeapon(TEXT("/Game/Mycontents/Character/Weapon/acorn_Knife/acornKnife.acornKnife"));
     if (SquirrelWeapon.Succeeded())
     {
         Weapon_Squirrel = SquirrelWeapon.Object;
     }
     // ºÏ±Ø°õ ¹«±â
-    static ConstructorHelpers::FObjectFinder<UStaticMeshComponent> PolarBearWeapon(TEXT("/Game/Mycontents/PlayerCharacterAM/MyMontage.MyMontage"));// ¾È´Æ
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> PolarBearWeapon(TEXT("/Game/Mycontents/Character/Weapon/tuna_Knife/tunaKnife.tunaKnife"));
     if (PolarBearWeapon.Succeeded())
     {
         Weapon_Polarbear = PolarBearWeapon.Object;
     }
+
+    Weapon->SetStaticMesh(Weapon_Squirrel);
+    Weapon->SetupAttachment(GetMesh(), WeaponSocket);
 }
 
 // Called when the game starts or when spawned
 void AEntityCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+   
 }
 
 // Called every frame
 void AEntityCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+   
 }
 
 // Called to bind functionality to input
@@ -100,12 +100,16 @@ void AEntityCharacter::Change(int32 Number)
     switch (CharNum) {
     case 1:
         GetMesh()->SetSkeletalMeshAsset(Character_Radbit);
+        Weapon->SetStaticMesh(Weapon_Radbit);
+        Weapon->SetupAttachment(GetMesh(), TEXT("RightHandIndex2"));
         break;
     case 2:
         GetMesh()->SetSkeletalMeshAsset(Character_Squirrel);
+        Weapon->SetStaticMesh(Weapon_Squirrel);
         break;
     case 3:
         GetMesh()->SetSkeletalMeshAsset(Character_Polarbear);
+        Weapon->SetStaticMesh(Weapon_Polarbear);
         break;
     default:
         return;
@@ -121,12 +125,16 @@ void AEntityCharacter::Server_CharacterChange_I(int32 CharacterNum)
     switch (CharNum) {
     case 1:
         GetMesh()->SetSkeletalMeshAsset(Character_Radbit);
+        Weapon->SetStaticMesh(Weapon_Radbit);
+        Weapon->SetupAttachment(GetMesh(), TEXT("RightHandIndex2"));
         break;
     case 2:
         GetMesh()->SetSkeletalMeshAsset(Character_Squirrel);
+        Weapon->SetStaticMesh(Weapon_Squirrel);
         break;
     case 3:
         GetMesh()->SetSkeletalMeshAsset(Character_Polarbear);
+        Weapon->SetStaticMesh(Weapon_Polarbear);
         break;
     default:
         return;
