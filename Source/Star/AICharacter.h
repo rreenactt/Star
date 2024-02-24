@@ -29,6 +29,8 @@ public:
 public:
 	virtual void Die() override;
 
+	void DieProcedure();
+
 	UFUNCTION()
 	virtual void ChangeAiCharacter();
 protected:

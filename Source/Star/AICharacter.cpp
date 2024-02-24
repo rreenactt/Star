@@ -3,6 +3,7 @@
 
 #include "AICharacter.h"
 #include "MyAIController.h"
+#include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AAICharacter::AAICharacter()
@@ -38,6 +39,22 @@ void AAICharacter::Die()
 	ServerAiDie();
 }
 
+void AAICharacter::DieProcedure()
+{
+	// 캡슐콜리전 삭제
+	UCapsuleComponent* AiCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
+	// 컨트롤러 삭제
+	AAIController* Aicontroller = Cast<AAIController>(GetController());
+	if (Aicontroller && AiCapsuleComponent)
+	{
+		GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
+
+		Aicontroller->Destroyed();
+		AiCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	GetMesh()->SetSimulatePhysics(true);
+}
+
 void AAICharacter::AiDiecall()
 {
 	MultiAiDie();
@@ -52,13 +69,16 @@ void AAICharacter::ChangeAiCharacter()
 
 void AAICharacter::ServerAiDie_I()
 {
-	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
-	//// 콜리전 삭제
+	// 캡슐콜리전 삭제
+	UCapsuleComponent* AiCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	// 컨트롤러 삭제
 	AAIController* Aicontroller = Cast<AAIController>(GetController());
-	if (Aicontroller)
+	if (Aicontroller && AiCapsuleComponent)
 	{
+		GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
+
 		Aicontroller->Destroyed();
+		AiCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	GetMesh()->SetSimulatePhysics(true);
 	AiDiecall();
@@ -71,6 +91,5 @@ bool AAICharacter::ServerAiDie_V()
 
 void AAICharacter::MultiAiDie_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
-	GetMesh()->SetSimulatePhysics(true);
+	DieProcedure();
 }

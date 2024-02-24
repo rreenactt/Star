@@ -46,6 +46,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isPlayerJump;
 
+	bool isCanAttack;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -103,6 +104,7 @@ protected:
 	void AttackStart();
 	void AttackEnd();
 
+	void CanAttack();
 	UFUNCTION()
 	void CharacterChangeRadbit();
 	void CharacterChangeSquirrel();
