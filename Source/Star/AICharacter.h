@@ -19,7 +19,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	
+	bool isDie;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -31,6 +32,7 @@ public:
 
 	void DieProcedure();
 
+	void CanChangeAi();
 	UFUNCTION()
 	virtual void ChangeAiCharacter();
 protected:

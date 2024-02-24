@@ -8,23 +8,20 @@
 
 AAICharacter::AAICharacter()
 {
+	isDie = false;
 }
 
 void AAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CanChangeAi();
 }
 
 void AAICharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//FTimerHandle myTimerHandle;
-	//GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
-	//{
-	//	ChangeAiCharacter();
-
-	//	GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-	//}), 5.0f, false);
+	
 }
 
 void AAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -48,7 +45,7 @@ void AAICharacter::DieProcedure()
 	if (Aicontroller && AiCapsuleComponent)
 	{
 		GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
-
+		isDie = true;
 		Aicontroller->Destroyed();
 		AiCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
@@ -58,6 +55,27 @@ void AAICharacter::DieProcedure()
 void AAICharacter::AiDiecall()
 {
 	MultiAiDie();
+}
+
+void AAICharacter::CanChangeAi()
+{
+	FTimerHandle myTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		int32 RandomNum = FMath::RandRange(1, 5);
+		if (RandomNum == 1)
+		{
+			ChangeAiCharacter();
+
+		}
+		if (!isDie)
+		{
+			return CanChangeAi();
+		}
+		
+		GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+	}), 2.0f, false);
+	
 }
 
 void AAICharacter::ChangeAiCharacter()
@@ -76,7 +94,7 @@ void AAICharacter::ServerAiDie_I()
 	if (Aicontroller && AiCapsuleComponent)
 	{
 		GEngine->AddOnScreenDebugMessage(0, 0.5f, FColor::Red, TEXT("Die"));
-
+		isDie = true;
 		Aicontroller->Destroyed();
 		AiCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
