@@ -29,10 +29,13 @@ public:
 public:
 	virtual void Die() override;
 
+	UFUNCTION()
+	virtual void ChangeAiCharacter();
 protected:
 
 	UFUNCTION()
 	void AiDiecall();
+
 
 	UFUNCTION(Reliable, Server = "ServerAiDie_I", WithValidation = "ServerAiDie_V")
 	virtual void ServerAiDie();
