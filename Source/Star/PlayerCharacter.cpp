@@ -65,10 +65,9 @@ void APlayerCharacter::BeginPlay()
 
 	// 공격 도구가 충돌하면 보내기
 	Weapon->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
-	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimSeting();
 
-	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
-	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
+	
 }
 
 void APlayerCharacter::PostInitializeComponents()
@@ -170,6 +169,13 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 	JumpEnd();
 }
 
+void APlayerCharacter::AnimSeting()
+{
+	AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
+	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
+}
+
 
 void APlayerCharacter::RunStart()
 {
@@ -261,6 +267,8 @@ void APlayerCharacter::CharacterChangeRadbit()
 	if (isCanAttack)
 	{
 		ChangeCharacter(1);
+		AnimSeting();
+
 	}
 }
 
@@ -269,6 +277,7 @@ void APlayerCharacter::CharacterChangeSquirrel()
 	if (isCanAttack)
 	{
 		ChangeCharacter(2);
+		AnimSeting();
 
 	}
 }
@@ -278,6 +287,7 @@ void APlayerCharacter::CharacterChangePolarbear()
 	if (isCanAttack)
 	{
 		ChangeCharacter(3);
+		AnimSeting();
 
 	}
 }
@@ -415,7 +425,7 @@ void APlayerCharacter::PalyerJumpUpdate()
 
 void APlayerCharacter::ServerPlayerAttackStart_I(bool att)
 {
-	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	// 실패시 리턴
 	if (nullptr == AnimInstance)
 		return;
@@ -446,7 +456,7 @@ void APlayerCharacter::PalyerAttackUpdate()
 {
 	if (isAttack)
 	{
-		auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 		// 실패시 리턴
 		if (nullptr == AnimInstance)
 			return;
