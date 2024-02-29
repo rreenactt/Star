@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "MultyPlayerAnimInstance.h"
 #include "AICharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
@@ -65,10 +66,9 @@ void APlayerCharacter::BeginPlay()
 
 	// 공격 도구가 충돌하면 보내기
 	Weapon->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
-	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimSeting();
 
-	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
-	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
+	
 }
 
 void APlayerCharacter::PostInitializeComponents()
@@ -162,11 +162,19 @@ void APlayerCharacter::MoveRight(float value)
 void APlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	AttackEnd();
+	UE_LOG(LogTemp, Warning, TEXT("End Montage"));
 }
 // 착지, 지면에 닿으면 호출되는 함수
 void APlayerCharacter::Landed(const FHitResult& Hit)
 {
 	JumpEnd();
+}
+
+void APlayerCharacter::AnimSeting()
+{
+	AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
+	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
 }
 
 
@@ -219,6 +227,13 @@ void APlayerCharacter::AttackStart()
 	{
 		ServerPlayerAttackStart(isAttack);
 	}
+	FTimerHandle myTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			CanAttack();
+
+			GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+		}), 1.8f, false);
 	isCanAttack = false;
 	isAttacking = true;
 	isAttack = true;
@@ -233,19 +248,15 @@ void APlayerCharacter::AttackEnd()
 	}
 	isAttacking = false;
 	isAttack = false;
-	FTimerHandle myTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
-	{
-			CanAttack();
-
-	GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-	}), 0.7f, false);
 }
 
 
 void APlayerCharacter::Die()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
+	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 	ServerKill();
 }
 
@@ -260,6 +271,8 @@ void APlayerCharacter::CharacterChangeRadbit()
 	if (isCanAttack)
 	{
 		ChangeCharacter(1);
+		AnimSeting();
+
 	}
 }
 
@@ -268,6 +281,8 @@ void APlayerCharacter::CharacterChangeSquirrel()
 	if (isCanAttack)
 	{
 		ChangeCharacter(2);
+		AnimSeting();
+
 	}
 }
 
@@ -276,6 +291,8 @@ void APlayerCharacter::CharacterChangePolarbear()
 	if (isCanAttack)
 	{
 		ChangeCharacter(3);
+		AnimSeting();
+
 	}
 }
 /////////////////////////////////////////////////////////////// 기능 구현 부분
@@ -412,7 +429,7 @@ void APlayerCharacter::PalyerJumpUpdate()
 
 void APlayerCharacter::ServerPlayerAttackStart_I(bool att)
 {
-	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	// 실패시 리턴
 	if (nullptr == AnimInstance)
 		return;
@@ -443,7 +460,7 @@ void APlayerCharacter::PalyerAttackUpdate()
 {
 	if (isAttack)
 	{
-		auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 		// 실패시 리턴
 		if (nullptr == AnimInstance)
 			return;
@@ -487,6 +504,8 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 void APlayerCharacter::ServerKill_I()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
+	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PlayerDieCall();
 }
 bool APlayerCharacter::ServerKill_V()
@@ -496,4 +515,6 @@ bool APlayerCharacter::ServerKill_V()
 void APlayerCharacter::MultiKill_Implementation()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
+	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

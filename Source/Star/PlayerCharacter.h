@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "EntityCharacter.h"
+#include "MultyPlayerAnimInstance.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -84,6 +85,12 @@ public:
 
 	UFUNCTION()
 	virtual void Landed(const FHitResult& Hit);
+
+	UFUNCTION()
+	void AnimSeting();
+
+	UPROPERTY()
+	UMultyPlayerAnimInstance* AnimInstance;
 
 	UFUNCTION()
 	void OnAttackOverlapBegin(class UPrimitiveComponent* OverlappedComp,
