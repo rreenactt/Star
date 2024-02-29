@@ -17,7 +17,7 @@ class STAR_API UOurGameInstance : public UGameInstance
 public:
 	UOurGameInstance();
 
-	class FOnlineSessionSettings SessionSettings;
+	//class FOnlineSessionSettings SessionSettings;
 
 	UFUNCTION(BlueprintCallable)
 	void CreateSession(int NumMaxPlayers, bool UseLAN);

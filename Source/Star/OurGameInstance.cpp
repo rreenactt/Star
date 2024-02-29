@@ -11,6 +11,7 @@ UOurGameInstance::UOurGameInstance()
 
 void UOurGameInstance::CreateSession(int NumMaxPlayers, bool UseLAN)
 {
+	/*
 	SessionSettings.bIsLANMatch = UseLAN;
 	SessionSettings.NumPublicConnections = NumMaxPlayers;
 	SessionSettings.NumPrivateConnections = 0;
@@ -19,5 +20,6 @@ void UOurGameInstance::CreateSession(int NumMaxPlayers, bool UseLAN)
 	SessionSettings.bAllowJoinViaPresence = true;
 	SessionSettings.bAllowJoinViaPresenceFriendsOnly = false;
 	SessionSettings.bUsesPresence = true;
+	*/
 	
 }
