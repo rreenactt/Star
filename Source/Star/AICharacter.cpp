@@ -68,12 +68,14 @@ void AAICharacter::CanChangeAi()
 			ChangeAiCharacter();
 
 		}
-		if (!isDie)
-		{
-			return CanChangeAi();
-		}
 		
 		GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+		if (isDie)
+		{
+			return;
+		}
+
+		CanChangeAi();
 	}), 2.0f, false);
 	
 }
