@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "MultyPlayerAnimInstance.h"
 #include "AICharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
@@ -253,6 +254,9 @@ void APlayerCharacter::AttackEnd()
 void APlayerCharacter::Die()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
+	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 	ServerKill();
 }
 
@@ -500,6 +504,8 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 void APlayerCharacter::ServerKill_I()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
+	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PlayerDieCall();
 }
 bool APlayerCharacter::ServerKill_V()
@@ -509,4 +515,6 @@ bool APlayerCharacter::ServerKill_V()
 void APlayerCharacter::MultiKill_Implementation()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
+	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
