@@ -19,7 +19,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	
+	bool isDie;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -29,10 +30,16 @@ public:
 public:
 	virtual void Die() override;
 
+	void DieProcedure();
+
+	void CanChangeAi();
+	UFUNCTION()
+	virtual void ChangeAiCharacter();
 protected:
 
 	UFUNCTION()
 	void AiDiecall();
+
 
 	UFUNCTION(Reliable, Server = "ServerAiDie_I", WithValidation = "ServerAiDie_V")
 	virtual void ServerAiDie();

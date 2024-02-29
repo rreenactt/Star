@@ -39,8 +39,6 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	
-	
-	
 	// 리플리케이션 허용
 	bReplicates = true;
 	// 달리고 있는가
@@ -55,6 +53,9 @@ APlayerCharacter::APlayerCharacter()
 	isAttack = false;
 	// 공격 중인가
 	isAttacking = false;
+
+	// 공격 할 수 있는가
+	isCanAttack = true;
 }
 
 // Called when the game starts or when spawned
@@ -63,16 +64,16 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 공격 도구가 충돌하면 보내기
-	AttackBox->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
+	Weapon->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
+	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+
+	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
+	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
 }
 
 void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	auto AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-
-	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
-	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -117,6 +118,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// 공격
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::AttackStart);
+
+	// 변신
+	PlayerInputComponent->BindAction("Radbit", IE_Pressed, this, &APlayerCharacter::CharacterChangeRadbit);
+	PlayerInputComponent->BindAction("Squirrel", IE_Pressed, this, &APlayerCharacter::CharacterChangeSquirrel);
+	PlayerInputComponent->BindAction("Polarbear", IE_Pressed, this, &APlayerCharacter::CharacterChangePolarbear);
+
 
 }
 
@@ -204,10 +211,15 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
+	if (!isCanAttack)
+	{
+		return;
+	}
 	if (GetLocalRole() < ROLE_Authority && !isAttack && !isAttacking)
 	{
 		ServerPlayerAttackStart(isAttack);
 	}
+	isCanAttack = false;
 	isAttacking = true;
 	isAttack = true;
 	PalyerAttackUpdate();
@@ -221,7 +233,15 @@ void APlayerCharacter::AttackEnd()
 	}
 	isAttacking = false;
 	isAttack = false;
+	FTimerHandle myTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+			CanAttack();
+
+	GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+	}), 0.7f, false);
 }
+
 
 void APlayerCharacter::Die()
 {
@@ -229,6 +249,35 @@ void APlayerCharacter::Die()
 	ServerKill();
 }
 
+void APlayerCharacter::CanAttack()
+{
+	isCanAttack = true;
+}
+
+///////////////////////////////////////////// 캐릭터 바꾸기
+void APlayerCharacter::CharacterChangeRadbit()
+{
+	if (isCanAttack)
+	{
+		ChangeCharacter(1);
+	}
+}
+
+void APlayerCharacter::CharacterChangeSquirrel()
+{
+	if (isCanAttack)
+	{
+		ChangeCharacter(2);
+	}
+}
+
+void APlayerCharacter::CharacterChangePolarbear()
+{
+	if (isCanAttack)
+	{
+		ChangeCharacter(3);
+	}
+}
 /////////////////////////////////////////////////////////////// 기능 구현 부분
 
 // 변수가 변했을때 호출하는 함수 부분
@@ -342,6 +391,10 @@ void APlayerCharacter::MultiPlayerJumpUpdate_Implementation()
 }
 void APlayerCharacter::PalyerJumpUpdate()
 {
+	if (isFalling)
+	{
+		return;
+	}
 	if (!isJump)
 	{
 		isPlayerJump = false;
