@@ -74,7 +74,7 @@ void AAICharacter::CanChangeAi()
 		}
 		
 		GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-	}), 2.0f, false);
+	}), 10.0f, false);
 	
 }
 
