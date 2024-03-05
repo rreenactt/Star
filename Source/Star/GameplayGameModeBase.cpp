@@ -2,4 +2,9 @@
 
 
 #include "GameplayGameModeBase.h"
-
+AGameplayGameModeBase::AGameplayGameModeBase()
+{
+}
+void AGameplayGameModeBase::BeginPlay()
+{
+}

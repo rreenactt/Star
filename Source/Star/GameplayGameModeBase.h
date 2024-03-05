@@ -13,5 +13,9 @@ UCLASS()
 class STAR_API AGameplayGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	AGameplayGameModeBase();
+
+	virtual void BeginPlay() override;
 };
