@@ -62,19 +62,21 @@ void AAICharacter::CanChangeAi()
 	FTimerHandle myTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
 	{
-		int32 RandomNum = FMath::RandRange(1, 5);
+		int32 RandomNum = FMath::RandRange(1, 7);
 		if (RandomNum == 1)
 		{
 			ChangeAiCharacter();
 
 		}
-		if (!isDie)
-		{
-			return CanChangeAi();
-		}
 		
 		GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-	}), 10.0f, false);
+		if (isDie)
+		{
+			return;
+		}
+
+		CanChangeAi();
+	}), 5.0f, false);
 	
 }
 
