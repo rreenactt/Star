@@ -506,6 +506,7 @@ void APlayerCharacter::ServerKill_I()
 	GetMesh()->SetSimulatePhysics(true);
 	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 	PlayerDieCall();
 }
 bool APlayerCharacter::ServerKill_V()
@@ -517,4 +518,6 @@ void APlayerCharacter::MultiKill_Implementation()
 	GetMesh()->SetSimulatePhysics(true);
 	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+
 }
