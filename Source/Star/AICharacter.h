@@ -20,6 +20,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isDie;
 public:
 	// Called every frame
@@ -35,10 +36,8 @@ public:
 	void CanChangeAi();
 	UFUNCTION()
 	virtual void ChangeAiCharacter();
-protected:
 
-	UFUNCTION()
-	void AiDiecall();
+protected:
 
 
 	UFUNCTION(Reliable, Server = "ServerAiDie_I", WithValidation = "ServerAiDie_V")
