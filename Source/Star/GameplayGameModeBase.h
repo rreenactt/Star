@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "MyPlayerController.h"
 #include "GameplayGameModeBase.generated.h"
 
 /**
@@ -18,4 +19,6 @@ public:
 	AGameplayGameModeBase();
 
 	virtual void BeginPlay() override;
+
+	void PlayerSpectatorconvert(AMyPlayerController* PlayerController);
 };
