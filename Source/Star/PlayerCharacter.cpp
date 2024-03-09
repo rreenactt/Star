@@ -58,6 +58,7 @@ APlayerCharacter::APlayerCharacter()
 	// 공격 할 수 있는가
 	isCanAttack = true;
 
+	// 죽었는가
 	isDie = false;
 }
 

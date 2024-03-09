@@ -20,5 +20,5 @@ public:
 
 	virtual void BeginPlay() override;
 
-	void PlayerSpectatorconvert(AMyPlayerController* PlayerController);
+	//void PlayerSpectatorconvert(AMyPlayerController* PlayerController, FVector CameraLocation, FRotator CameraRotator);
 };
