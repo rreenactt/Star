@@ -2,9 +2,18 @@
 
 
 #include "GameplayGameModeBase.h"
+#include "MyPlayerController.h"
 AGameplayGameModeBase::AGameplayGameModeBase()
 {
 }
 void AGameplayGameModeBase::BeginPlay()
 {
+}
+
+void AGameplayGameModeBase::PlayerSpectatorconvert(AMyPlayerController* PlayerController)
+{
+	if (PlayerController)
+	{
+
+	}
 }
