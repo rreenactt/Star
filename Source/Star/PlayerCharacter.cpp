@@ -57,6 +57,8 @@ APlayerCharacter::APlayerCharacter()
 
 	// 공격 할 수 있는가
 	isCanAttack = true;
+
+	isDie = false;
 }
 
 // Called when the game starts or when spawned
@@ -130,15 +132,28 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::MoveForward(float value)
 {
-	// GetConjtrolRotation을 변수에 가져옴
-	const FRotator Rot = Controller->GetControlRotation();
+	if (!isDie)
+	{
+		// GetConjtrolRotation을 변수에 가져옴
+		const FRotator Rot = Controller->GetControlRotation();
+		// 해당 변수에 캐릭터의 Y값을 가져옴
+		const FRotator YawRot(0, Rot.Yaw, 0);
+		// 백터값으로 전환해서 저장
+		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, value);
+	}
+	else
+	{
+		// GetConjtrolRotation을 변수에 가져옴
+		const FRotator Rot = Controller->GetControlRotation();
+		// 해당 변수에 캐릭터의 Y값을 가져옴
+		const FRotator YawRot(Rot.Pitch, Rot.Yaw, 0);
+		// 백터값으로 전환해서 저장
+		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, value);
 
-	// 해당 변수에 캐릭터의 Y값을 가져옴
-	const FRotator YawRot(0, Rot.Yaw, 0);
-	// 백터값으로 전환해서 저장
-	const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+	}
 	
-	AddMovementInput(Direction, value);
 
 }
 
@@ -219,7 +234,7 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
-	if (!isCanAttack)
+	if (!isCanAttack || isDie)
 	{
 		return;
 	}
@@ -254,9 +269,11 @@ void APlayerCharacter::AttackEnd()
 void APlayerCharacter::Die()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	CameraBoom->TargetArmLength = 0;
 	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	isDie = true;
 	ServerKill();
 }
 
@@ -507,6 +524,7 @@ void APlayerCharacter::ServerKill_I()
 	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	isDie = true;
 	PlayerDieCall();
 }
 bool APlayerCharacter::ServerKill_V()
@@ -518,6 +536,7 @@ void APlayerCharacter::MultiKill_Implementation()
 	GetMesh()->SetSimulatePhysics(true);
 	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	isDie = true;
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 
 }
