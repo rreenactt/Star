@@ -3,6 +3,8 @@
 
 #include "GameplayGameModeBase.h"
 #include "MyPlayerController.h"
+#include "PlayerSpectatorPawn.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/SpectatorPawn.h"
 
 
@@ -13,21 +15,20 @@ void AGameplayGameModeBase::BeginPlay()
 {
 }
 
-//void AGameplayGameModeBase::PlayerSpectatorconvert(AMyPlayerController* PlayerController, FVector CameraLocation, FRotator CameraRotator, Camera)
-//{
-//	if (PlayerController)
-//	{
-//		PlayerController->UnPossess();
-//        ASpectatorPawn* NewSpectatorPawn = GetWorld()->SpawnActor<ASpectatorPawn>(ASpectatorPawn::StaticClass(), CameraLocation, CameraRotator);
-//        if (NewSpectatorPawn)
-//        {
-//            APlayerCameraManager* PlayerCameraManager = PlayerController->;
-//            if (PlayerCameraManager)
-//            {
-//                // 관전자 컨트롤 설정
-//                PlayerController->Possess(NewSpectatorPawn);
-//                PlayerCameraManager->SetViewTargetWithBlend(NewSpectatorPawn, 0.5f);
-//            }
-//        }
-//	}
-//}
+void AGameplayGameModeBase::PlayerSpectatorconvert(AMyPlayerController* PlayerController, FVector CameraLocation, FRotator CameraRotator)
+{
+    UE_LOG(LogTemp, Warning, TEXT("In GameMode"));
+
+	if (PlayerController)
+	{
+		PlayerController->UnPossess();
+        ASpectatorPawn* NewSpectatorPawn = GetWorld()->SpawnActor<ASpectatorPawn>(ASpectatorPawn::StaticClass(), CameraLocation, CameraRotator);
+        if (NewSpectatorPawn)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("last"));
+            // 관전자 컨트롤 설정
+            PlayerController->Possess(NewSpectatorPawn);
+            PlayerController->SetViewTargetWithBlend(NewSpectatorPawn, 0.5f);
+        }
+	}
+}
