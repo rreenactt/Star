@@ -250,7 +250,7 @@ void APlayerCharacter::AttackStart()
 			CanAttack();
 
 			GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-		}), 1.8f, false);
+		}), 2.8f, false);
 	isCanAttack = false;
 	isAttacking = true;
 	isAttack = true;
