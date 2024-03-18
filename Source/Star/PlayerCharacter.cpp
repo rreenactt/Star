@@ -284,7 +284,7 @@ void APlayerCharacter::Die()
 		GameMode->PlayerSpectatorconvert(MyController, MyVector, MyRotator);
 	}
 	isDie = true;
-	ServerKill();
+	//ServerDie();
 }
 
 void APlayerCharacter::CanAttack()
@@ -299,7 +299,6 @@ void APlayerCharacter::CharacterChangeRadbit()
 	{
 		ChangeCharacter(1);
 		AnimSeting();
-
 	}
 }
 
@@ -309,7 +308,6 @@ void APlayerCharacter::CharacterChangeSquirrel()
 	{
 		ChangeCharacter(2);
 		AnimSeting();
-
 	}
 }
 
@@ -319,7 +317,6 @@ void APlayerCharacter::CharacterChangePolarbear()
 	{
 		ChangeCharacter(3);
 		AnimSeting();
-
 	}
 }
 /////////////////////////////////////////////////////////////// 기능 구현 부분
@@ -499,8 +496,6 @@ void APlayerCharacter::PalyerAttackUpdate()
 		isAttacking = false;
 		isAttack = false;
 	}
-
-	
 }
 void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
@@ -511,7 +506,7 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 	{
 		return;
 	}
-
+	
 	// AI
 	Target = Cast<AAICharacter>(OtherActor);
 	if (Target)
@@ -527,8 +522,9 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 			Target->Die();
 		}
 	}
+	ServerPlayerToKill(OtherActor);
 }
-void APlayerCharacter::ServerKill_I()
+void APlayerCharacter::ServerDie_I()
 {
 	
 	GetMesh()->SetSimulatePhysics(true);
@@ -548,7 +544,7 @@ void APlayerCharacter::ServerKill_I()
 	isDie = true;
 	PlayerDieCall();
 }
-bool APlayerCharacter::ServerKill_V()
+bool APlayerCharacter::ServerDie_V()
 {
 	return true;
 }
@@ -568,6 +564,57 @@ void APlayerCharacter::MultiKill_Implementation()
 	}
 
 	isDie = true;
-	//FGetCharacterMovement()->SetMovementMode(MOVE_Flying);
 
+}
+
+void APlayerCharacter::ServerPlayerToKill_I(AActor* OtherActor)
+{
+
+	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this && OtherActor == NULL || !isAttacking || OtherActor == this)
+	{
+		return;
+	}
+	Target = Cast<AAICharacter>(OtherActor);
+	if (Target)
+	{
+		Target->Die();
+	}
+	else
+	{
+		// 상대 플레이어
+		Target = Cast<APlayerCharacter>(OtherActor);
+		if (Target)
+		{
+			Target->Die();
+		}
+	}
+	MultiPlayerToKill(OtherActor);
+}
+
+bool APlayerCharacter::ServerPlayerToKill_V(AActor* OtherActor)
+{
+	return true;
+}
+
+void APlayerCharacter::MultiPlayerToKill_Implementation(AActor* OtherActor)
+{
+
+	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this && OtherActor == NULL || !isAttacking || OtherActor == this)
+	{
+		return;
+	}
+	Target = Cast<AAICharacter>(OtherActor);
+	if (Target)
+	{
+		Target->Die();
+	}
+	else
+	{
+		// 상대 플레이어
+		Target = Cast<APlayerCharacter>(OtherActor);
+		if (Target)
+		{
+			Target->Die();
+		}
+	}
 }
