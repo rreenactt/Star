@@ -43,7 +43,7 @@ void AAICharacter::Die()
 		isDie = true;
 		GetMesh()->SetSimulatePhysics(true);
 		AiCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		ServerAiDie();
+		//ServerAiDie();
 
 	}
 	
