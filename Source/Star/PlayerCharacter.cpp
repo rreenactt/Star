@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "MultyPlayerAnimInstance.h"
 #include "AICharacter.h"
+#include "GameplayGameModeBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -57,6 +58,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// 공격 할 수 있는가
 	isCanAttack = true;
+
+	// 죽었는가
+	isDie = false;
 }
 
 // Called when the game starts or when spawned
@@ -130,15 +134,28 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::MoveForward(float value)
 {
-	// GetConjtrolRotation을 변수에 가져옴
-	const FRotator Rot = Controller->GetControlRotation();
+	if (!isDie)
+	{
+		// GetConjtrolRotation을 변수에 가져옴
+		const FRotator Rot = Controller->GetControlRotation();
+		// 해당 변수에 캐릭터의 Y값을 가져옴
+		const FRotator YawRot(0, Rot.Yaw, 0);
+		// 백터값으로 전환해서 저장
+		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, value);
+	}
+	else
+	{
+		// GetConjtrolRotation을 변수에 가져옴
+		const FRotator Rot = Controller->GetControlRotation();
+		// 해당 변수에 캐릭터의 Y값을 가져옴
+		const FRotator YawRot(Rot.Pitch, Rot.Yaw, 0);
+		// 백터값으로 전환해서 저장
+		const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, value);
 
-	// 해당 변수에 캐릭터의 Y값을 가져옴
-	const FRotator YawRot(0, Rot.Yaw, 0);
-	// 백터값으로 전환해서 저장
-	const FVector Direction = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+	}
 	
-	AddMovementInput(Direction, value);
 
 }
 
@@ -219,7 +236,7 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
-	if (!isCanAttack)
+	if (!isCanAttack || isDie)
 	{
 		return;
 	}
@@ -233,7 +250,7 @@ void APlayerCharacter::AttackStart()
 			CanAttack();
 
 			GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-		}), 1.8f, false);
+		}), 2.8f, false);
 	isCanAttack = false;
 	isAttacking = true;
 	isAttack = true;
@@ -254,10 +271,20 @@ void APlayerCharacter::AttackEnd()
 void APlayerCharacter::Die()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	CameraBoom->TargetArmLength = 0;
 	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-	ServerKill();
+
+	AGameplayGameModeBase* GameMode = Cast<AGameplayGameModeBase>(GetWorld()->GetAuthGameMode());
+	AMyPlayerController* MyController = Cast<AMyPlayerController>(GetController());
+	if (GameMode && MyController)
+	{
+		FVector MyVector = MyController->GetPawn()->GetActorLocation();
+		FRotator MyRotator = MyController->GetPawn()->GetActorRotation();
+		GameMode->PlayerSpectatorconvert(MyController, MyVector, MyRotator);
+	}
+	isDie = true;
+	//ServerDie();
 }
 
 void APlayerCharacter::CanAttack()
@@ -272,7 +299,6 @@ void APlayerCharacter::CharacterChangeRadbit()
 	{
 		ChangeCharacter(1);
 		AnimSeting();
-
 	}
 }
 
@@ -282,7 +308,6 @@ void APlayerCharacter::CharacterChangeSquirrel()
 	{
 		ChangeCharacter(2);
 		AnimSeting();
-
 	}
 }
 
@@ -292,7 +317,6 @@ void APlayerCharacter::CharacterChangePolarbear()
 	{
 		ChangeCharacter(3);
 		AnimSeting();
-
 	}
 }
 /////////////////////////////////////////////////////////////// 기능 구현 부분
@@ -472,8 +496,6 @@ void APlayerCharacter::PalyerAttackUpdate()
 		isAttacking = false;
 		isAttack = false;
 	}
-
-	
 }
 void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
@@ -484,7 +506,7 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 	{
 		return;
 	}
-
+	
 	// AI
 	Target = Cast<AAICharacter>(OtherActor);
 	if (Target)
@@ -500,16 +522,29 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 			Target->Die();
 		}
 	}
+	ServerPlayerToKill(OtherActor);
 }
-void APlayerCharacter::ServerKill_I()
+void APlayerCharacter::ServerDie_I()
 {
+	
 	GetMesh()->SetSimulatePhysics(true);
 	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	//GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	
+	AGameplayGameModeBase* GameMode = Cast<AGameplayGameModeBase>(GetWorld()->GetAuthGameMode());
+	AMyPlayerController* MyController = Cast<AMyPlayerController>(GetController());
+	if (GameMode && MyController)
+	{
+		FVector MyVector = MyController->GetPawn()->GetActorLocation();
+		FRotator MyRotator = MyController->GetPawn()->GetActorRotation();
+		GameMode->PlayerSpectatorconvert(MyController, MyVector, MyRotator);
+	}
+
+	isDie = true;
 	PlayerDieCall();
 }
-bool APlayerCharacter::ServerKill_V()
+bool APlayerCharacter::ServerDie_V()
 {
 	return true;
 }
@@ -518,6 +553,68 @@ void APlayerCharacter::MultiKill_Implementation()
 	GetMesh()->SetSimulatePhysics(true);
 	UCapsuleComponent* MyCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
 	MyCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 
+	AGameplayGameModeBase* GameMode = Cast<AGameplayGameModeBase>(GetWorld()->GetAuthGameMode());
+	AMyPlayerController* MyController = Cast<AMyPlayerController>(GetController());
+	if (GameMode && MyController)
+	{
+		FVector MyVector = MyController->GetPawn()->GetActorLocation();
+		FRotator MyRotator = MyController->GetPawn()->GetActorRotation();
+		GameMode->PlayerSpectatorconvert(MyController, MyVector, MyRotator);
+	}
+
+	isDie = true;
+
+}
+
+void APlayerCharacter::ServerPlayerToKill_I(AActor* OtherActor)
+{
+
+	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this && OtherActor == NULL || !isAttacking || OtherActor == this)
+	{
+		return;
+	}
+	Target = Cast<AAICharacter>(OtherActor);
+	if (Target)
+	{
+		Target->Die();
+	}
+	else
+	{
+		// 상대 플레이어
+		Target = Cast<APlayerCharacter>(OtherActor);
+		if (Target)
+		{
+			Target->Die();
+		}
+	}
+	MultiPlayerToKill(OtherActor);
+}
+
+bool APlayerCharacter::ServerPlayerToKill_V(AActor* OtherActor)
+{
+	return true;
+}
+
+void APlayerCharacter::MultiPlayerToKill_Implementation(AActor* OtherActor)
+{
+
+	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this && OtherActor == NULL || !isAttacking || OtherActor == this)
+	{
+		return;
+	}
+	Target = Cast<AAICharacter>(OtherActor);
+	if (Target)
+	{
+		Target->Die();
+	}
+	else
+	{
+		// 상대 플레이어
+		Target = Cast<APlayerCharacter>(OtherActor);
+		if (Target)
+		{
+			Target->Die();
+		}
+	}
 }

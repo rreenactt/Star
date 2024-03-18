@@ -48,6 +48,9 @@ public:
 	bool isPlayerJump;
 
 	bool isCanAttack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isDie;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -153,6 +156,7 @@ protected:
 	virtual void MultiPlayerJumpUpdate();
 	void MultiPlayerJumpUpdate_Implementation();
 
+	// °ø°Ý RPC
 protected:
 	UFUNCTION(Reliable, Server = "ServerPlayerAttackStart_I", WithValidation = "ServerPlayerAttackStart_V")
 	virtual void ServerPlayerAttackStart(bool att);
@@ -168,14 +172,25 @@ protected:
 	virtual void MultiPlayerAttackUpdate();
 	void MultiPlayerAttackUpdate_Implementation();
 
+	// Á×À½ RPC
 protected:
-	UFUNCTION(Reliable, Server = "ServerKill_I", WithValidation = "ServerKill_V")
-	virtual void ServerKill();
-	void ServerKill_I();
-	bool ServerKill_V();
+	UFUNCTION(Reliable, Server = "ServerDie_I", WithValidation = "ServerDie_V")
+	virtual void ServerDie();
+	void ServerDie_I();
+	bool ServerDie_V();
 
 	UFUNCTION(Reliable, NetMulticast)
 	virtual void MultiKill();
 	void MultiKill_Implementation();
 
+	 //Á×ÀÌ´Â RPC
+protected:
+	UFUNCTION(Reliable, Server = "ServerPlayerToKill_I", WithValidation = "ServerPlayerToKill_V")
+	virtual void ServerPlayerToKill(AActor* OtherActor);
+	void ServerPlayerToKill_I(AActor* OtherActor);
+	bool ServerPlayerToKill_V(AActor* OtherActor);
+
+	UFUNCTION(Reliable, NetMulticast)
+	virtual void MultiPlayerToKill(AActor* OtherActor);
+	void MultiPlayerToKill_Implementation(AActor* OtherActor);
 };
