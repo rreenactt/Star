@@ -200,19 +200,14 @@ void APlayerCharacter::AnimSeting()
 
 void APlayerCharacter::RunStart()
 {
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		ServerPlayerRunStart(isRun);
-	}
+	ServerPlayerRunStart(isRun);
 	isRun = true;
 	PlayerSpeedUpdate();
 }
 void APlayerCharacter::RunStop()
 {
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		ServerPlayerRunStop(isRun);
-	}
+	ServerPlayerRunStop(isRun);
+	
 	isRun = false;
 	PlayerSpeedUpdate();
 }
@@ -294,6 +289,7 @@ void APlayerCharacter::CharacterChangeRadbit()
 {
 	if (isCanAttack)
 	{
+		isAttack = false;
 		ChangeCharacter(1);
 		AnimSeting();
 	}
@@ -303,6 +299,7 @@ void APlayerCharacter::CharacterChangeSquirrel()
 {
 	if (isCanAttack)
 	{
+		isAttack = false;
 		ChangeCharacter(2);
 		AnimSeting();
 	}
@@ -312,6 +309,7 @@ void APlayerCharacter::CharacterChangePolarbear()
 {
 	if (isCanAttack)
 	{
+		isAttack = false;
 		ChangeCharacter(3);
 		AnimSeting();
 	}
@@ -346,12 +344,9 @@ void APlayerCharacter::PlayerDieCall()
 // Server Run Start
 void APlayerCharacter::ServerPlayerRunStart_I(bool run)
 {
-	// 관한있는지 확인
-	if (HasAuthority())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 375;
-		isRun = true;
-	}
+	GetCharacterMovement()->MaxWalkSpeed = 375;
+	isRun = true;
+	
 }
 bool APlayerCharacter::ServerPlayerRunStart_V(bool re)
 {
@@ -360,12 +355,9 @@ bool APlayerCharacter::ServerPlayerRunStart_V(bool re)
 // Server Run Stop
 void APlayerCharacter::ServerPlayerRunStop_I(bool run)
 {
-	// 관한있는지 확인
-	if (HasAuthority())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 125;
-		isRun = false;
-	}
+	GetCharacterMovement()->MaxWalkSpeed = 125;
+	isRun = false;
+	
 }
 bool APlayerCharacter::ServerPlayerRunStop_V(bool re)
 {
