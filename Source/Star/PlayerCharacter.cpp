@@ -72,7 +72,8 @@ void APlayerCharacter::BeginPlay()
 	// 공격 도구가 충돌하면 보내기
 	Weapon->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
 	AnimSeting();
-	
+
+	ChangeCharacter(1);
 	
 	
 }
@@ -216,20 +217,16 @@ void APlayerCharacter::JumpStart()
 {
 	isPlayerJump = true;
 	isJump = true;
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		ServerPlayerJumpStart(isJump);
-	}
+	ServerPlayerJumpStart(isJump);
+	
 	PalyerJumpUpdate();
 }
 void APlayerCharacter::JumpEnd()
 {
 	isPlayerJump = false;
 	isJump = false;
-	if (GetLocalRole() < ROLE_Authority)
-	{
-		ServerPlayerJumpEnd(isJump);
-	}
+	
+	ServerPlayerJumpEnd(isJump);
 }
 
 void APlayerCharacter::AttackStart()
