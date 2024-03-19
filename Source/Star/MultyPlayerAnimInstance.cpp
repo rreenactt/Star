@@ -17,3 +17,14 @@ void UMultyPlayerAnimInstance::PlayAttackMontage()
 	Montage_Play(AttackMontage, 1.0f);
 }
 
+void UMultyPlayerAnimInstance::AnimNotify_HitAttack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Aninotify_HitAttack"));
+	HitAttackDelegate.Broadcast();
+}
+
+void UMultyPlayerAnimInstance::AnimNotify_EndAttack()
+{
+	EndAttackDelegate.Broadcast();
+}
+

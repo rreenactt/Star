@@ -51,16 +51,17 @@ APlayerCharacter::APlayerCharacter()
 	isJump = false;
 	// 점프를 했는가(플레이어)
 	isPlayerJump = false;
-	// 공격을 했는가
+	
+	// 죽일 수 있는가
 	isAttack = false;
-	// 공격 중인가
-	isAttacking = false;
 
 	// 공격 할 수 있는가
 	isCanAttack = true;
 
 	// 죽었는가
 	isDie = false;
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -71,24 +72,24 @@ void APlayerCharacter::BeginPlay()
 	// 공격 도구가 충돌하면 보내기
 	Weapon->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnAttackOverlapBegin);
 	AnimSeting();
-
+	
+	
 	
 }
 
 void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	//현재 체력 리플리케이트
 	DOREPLIFETIME(APlayerCharacter, isRun);
 	DOREPLIFETIME(APlayerCharacter, isJump);
-	DOREPLIFETIME(APlayerCharacter, isAttack);
-	DOREPLIFETIME(APlayerCharacter, isAttacking);
+
 }
 
 // Called every frame
@@ -179,7 +180,6 @@ void APlayerCharacter::MoveRight(float value)
 void APlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	AttackEnd();
-	UE_LOG(LogTemp, Warning, TEXT("End Montage"));
 }
 // 착지, 지면에 닿으면 호출되는 함수
 void APlayerCharacter::Landed(const FHitResult& Hit)
@@ -192,6 +192,9 @@ void APlayerCharacter::AnimSeting()
 	AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
 	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
+	AnimInstance->HitAttackDelegate.AddDynamic(this, &APlayerCharacter::HitAttacking);
+	AnimInstance->EndAttackDelegate.AddDynamic(this, &APlayerCharacter::EndAttacking);
+	
 }
 
 
@@ -236,35 +239,29 @@ void APlayerCharacter::JumpEnd()
 
 void APlayerCharacter::AttackStart()
 {
-	if (!isCanAttack || isDie)
-	{
+	// 공격개시
+	if (!isCanAttack){
+		UE_LOG(LogTemp, Warning, TEXT("NOT ATTACK")); 
 		return;
 	}
-	if (GetLocalRole() < ROLE_Authority && !isAttack && !isAttacking)
-	{
-		ServerPlayerAttackStart(isAttack);
-	}
+	isCanAttack = false;
+	
+	PalyerAttackUpdate();
+	ServerPlayerAttackStart(isAttack);
 	FTimerHandle myTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
 		{
 			CanAttack();
+			UE_LOG(LogTemp, Warning, TEXT("ATTACk_____________END"));
 
 			GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
-		}), 2.8f, false);
-	isCanAttack = false;
-	isAttacking = true;
-	isAttack = true;
-	PalyerAttackUpdate();
+		}), 3.0f, false);
 }
 
 void APlayerCharacter::AttackEnd()
 {
-	if (GetLocalRole() < ROLE_Authority && isAttack)
-	{
-		ServerPlayerAttackEnd(isAttack);
-	}
-	isAttacking = false;
-	isAttack = false;
+	if (isCanAttack) { return; }
+	// 이거 필요없는 함수
 }
 
 
@@ -450,59 +447,49 @@ void APlayerCharacter::PalyerJumpUpdate()
 
 
 /////////////////////////////////////////////////////////////// ATTACK
+// 델리게이트 호출함수
+void APlayerCharacter::HitAttacking()
+{
+	UE_LOG(LogTemp, Warning, TEXT("isAttack---------true"));
+	isAttack = true;
+}
+void APlayerCharacter::EndAttacking()
+{
+	UE_LOG(LogTemp, Warning, TEXT("isAttack-----------false"));
+	isAttack = false;
+}
 
 void APlayerCharacter::ServerPlayerAttackStart_I(bool att)
 {
 	AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	// 실패시 리턴
-	if (nullptr == AnimInstance)
-		return;
-
+	if (nullptr == AnimInstance){ return; }
 	AnimInstance->PlayAttackMontage();
-	isAttack = true;
-	isAttacking = true;
-
+	MultiPlayerAttackUpdate();
 }
 bool APlayerCharacter::ServerPlayerAttackStart_V(bool att)
 {
 	return true;
 }
-void APlayerCharacter::ServerPlayerAttackEnd_I(bool att)
-{
-	isAttack = false;
-	isAttacking = false;
-}
-bool APlayerCharacter::ServerPlayerAttackEnd_V(bool att)
-{
-	return true;
-}
+
 void APlayerCharacter::MultiPlayerAttackUpdate_Implementation()
 {
 	PalyerAttackUpdate();
 }
 void APlayerCharacter::PalyerAttackUpdate()
 {
-	if (isAttack)
-	{
-		AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-		// 실패시 리턴
-		if (nullptr == AnimInstance)
-			return;
-
-		AnimInstance->PlayAttackMontage();
-	}
-	else
-	{
-		isAttacking = false;
-		isAttack = false;
-	}
+	AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	// 실패시 리턴
+	if (nullptr == AnimInstance){ return; }
+	// 몽타지 플레이
+	AnimInstance->PlayAttackMontage();
 }
 void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
-	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this && OtherActor == NULL || !isAttacking || OtherActor == this)
+	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this || !isAttack)
 	{
 		return;
 	}
@@ -512,6 +499,7 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 	if (Target)
 	{
 		Target->Die();
+		ServerPlayerToKill(OtherActor);
 	}
 	else
 	{
@@ -520,9 +508,10 @@ void APlayerCharacter::OnAttackOverlapBegin(class UPrimitiveComponent* Overlappe
 		if (Target)
 		{
 			Target->Die();
+			ServerPlayerToKill(OtherActor);
 		}
 	}
-	ServerPlayerToKill(OtherActor);
+	
 }
 void APlayerCharacter::ServerDie_I()
 {
@@ -569,11 +558,6 @@ void APlayerCharacter::MultiKill_Implementation()
 
 void APlayerCharacter::ServerPlayerToKill_I(AActor* OtherActor)
 {
-
-	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this && OtherActor == NULL || !isAttacking || OtherActor == this)
-	{
-		return;
-	}
 	Target = Cast<AAICharacter>(OtherActor);
 	if (Target)
 	{
@@ -598,11 +582,6 @@ bool APlayerCharacter::ServerPlayerToKill_V(AActor* OtherActor)
 
 void APlayerCharacter::MultiPlayerToKill_Implementation(AActor* OtherActor)
 {
-
-	if (!(OtherActor->GetClass()->IsChildOf(AEntityCharacter::StaticClass())) || OtherActor == this && OtherActor == NULL || !isAttacking || OtherActor == this)
-	{
-		return;
-	}
 	Target = Cast<AAICharacter>(OtherActor);
 	if (Target)
 	{

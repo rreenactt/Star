@@ -37,10 +37,8 @@ public:
 	UPROPERTY(ReplicatedUsing = PlayerJumpUpdateCall)
 	bool isJump;
 
-	UPROPERTY(ReplicatedUsing = PlayerAttackUpdateCall)
+	UPROPERTY()
 	bool isAttack;
-	UPROPERTY(Replicated)
-	bool isAttacking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isFalling;
 
@@ -158,15 +156,15 @@ protected:
 
 	// АјАн RPC
 protected:
+
+	UFUNCTION()
+	void HitAttacking();
+	UFUNCTION()
+	void EndAttacking();
 	UFUNCTION(Reliable, Server = "ServerPlayerAttackStart_I", WithValidation = "ServerPlayerAttackStart_V")
 	virtual void ServerPlayerAttackStart(bool att);
 	void ServerPlayerAttackStart_I(bool att);
 	bool ServerPlayerAttackStart_V(bool att);
-
-	UFUNCTION(Reliable, Server = "ServerPlayerAttackEnd_I", WithValidation = "ServerPlayerAttackEnd_V")
-	virtual void ServerPlayerAttackEnd(bool att);
-	void ServerPlayerAttackEnd_I(bool att);
-	bool ServerPlayerAttackEnd_V(bool att);
 
 	UFUNCTION(Reliable, NetMulticast)
 	virtual void MultiPlayerAttackUpdate();
