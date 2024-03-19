@@ -32,10 +32,7 @@ void AAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AAICharacter::Die()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Die and all destroyed!"));
 	UCapsuleComponent* AiCapsuleComponent = Cast<UCapsuleComponent>(GetCapsuleComponent());
-	// 컨트롤러
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DIE!"));
 
 	if (AiCapsuleComponent && AiCapsuleComponent->GetCollisionEnabled() != (ECollisionEnabled::NoCollision))
 	{

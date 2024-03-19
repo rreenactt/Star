@@ -190,6 +190,8 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 
 void APlayerCharacter::AnimSeting()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ChaingeCharacter!"));
+
 	AnimInstance = Cast<UMultyPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	//OnMontageEnded는 AnimInstance 기본 변수이다.몽타주가 끝났을 때 AttackMontageEnded 함수를 호출시킨다.
 	AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);

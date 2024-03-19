@@ -106,6 +106,7 @@ void AEntityCharacter::Change(int32 Number)
     case 2:
         GetMesh()->SetSkeletalMeshAsset(Character_Squirrel);
         Weapon->SetStaticMesh(Weapon_Squirrel);
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ChaingeCharacter!"));
         break;
     case 3:
         GetMesh()->SetSkeletalMeshAsset(Character_Polarbear);
