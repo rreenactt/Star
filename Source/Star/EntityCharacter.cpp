@@ -88,7 +88,7 @@ void AEntityCharacter::ChangeCharacter(int32 Number)
     else if (GetLocalRole() == ROLE_AutonomousProxy) // 현재 인스턴스가 클라이언트인지 확인
     {
         // 서버에 호출 요청
-        Server_CharacterChange(Number);
+        Change(Number);
 
     }
    
